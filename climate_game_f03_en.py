@@ -19,7 +19,7 @@ from KiinClient import Guest #, AnimationMode
 
 
 n_obververs = 0 # number of additional non playing observers
-n_players = 1 # number of players plaing the game - not observers
+n_players = 2 # number of players plaing the game - not observers
 H_Rate_One_Shot = 0.1 / n_players # 0.2
 
 NickNameToPlayerNR = { # this number indicates to which position the user has been assigned
@@ -176,10 +176,10 @@ class Application:
         # Initialize a game object from config dictionary
         self.game = EnvirGame.from_config(n_agents=n_players, K=self.resourceSize, no_behavior=True, noise=0) #T=5 # T regeneracja od 5 do 95% stan srodowiska. T najlepiej nie ruszac 
         self.T = 30 # duration of one round
-        self.NR = 15 # number of rounds
+        self.NR = 12 # number of rounds
         self.i = 0 # number of steps so far in one round
         self.H = np.zeros(self.game.n_agents)
-        self.RLb = np.loadtxt("RL_bias.txt", delimiter=" ") # RL learned bias compensation
+        # self.RLb = np.loadtxt("RL_bias.txt", delimiter=" ") # RL learned bias compensation
  
 
     def get_index_from_cube_id(self, cube_id):
@@ -268,13 +268,10 @@ class Application:
         elif pUr>40/z:
             #self.client.PushCommand("disable_object", f"participant{player_n}_{wealth_objects[6]}")
             self.client.PushCommand("enable_object",  f"participant{player_n}_{wealth_objects[7]}") 
-
-    # def Load_RL_learned_bias(self):
-    #     self.RLb = np.loadtxt("RL_bias.txt", delimiter=" ")
     
     # compute fias for given round (rounds counts form 0 to NR-1)
-    def bias_for_roundNr(self, roundNr):
-        return self.RLb[int((roundNr)*len(self.RLb)/(self.NR-0.999))][1]
+    # def bias_for_roundNr(self, roundNr):
+    #     return self.RLb[int((roundNr)*len(self.RLb)/(self.NR-0.999))][1]
     
     def handler(self, source, args):
         
@@ -438,7 +435,7 @@ class Application:
 
 # Duration of game round: 30s 
 # Pause in the game: 15s
-# Number of rounds: 20
+# Number of rounds: 12
 
 # Start of game loop ######################################################################################
 # round: sound (ping), game clock or: PLAY - play mark on the display - turning on the lasers, color of the deposit
@@ -449,7 +446,7 @@ class Application:
         self.client.PushCommand("play_audio_clip", "ping.ogg source 0.1 0.0 false")
         time.sleep(3) # artificially added delay, because it is not known why, the laser does not immediately turn on. Maybe because of PushCommand
 
-        for ri in range(self.NR): # number of rounds: 15
+        for ri in range(self.NR): # number of rounds: 12
             self.client.PushCommand("fade_in", "1.0")      
             self.client.PushCommand("show_text", f"global_message \"Round {ri+1}\" 1.0") 
 
@@ -461,7 +458,7 @@ class Application:
 
                 print(self.H)
                 self.game.H = self.H
-                self.game.dynamics.run(1 / (self.T*15)) # 1/self.T is an entire epoch in one round, 
+                self.game.dynamics.run(1 / (self.T*self.NR)) # 1/self.T is an entire epoch in one round, 
                                                         # because the “run” for 1 is an entire epoch, i.e., a full restoration of the environment
                 self.i = self.i+1
                 self.cube_manager.scale_all_objects() # to reverse the scaling effect when the cursor goes off the object
@@ -490,23 +487,38 @@ class Application:
             self.cube_manager.set_color_all_objects("#777777")
             time.sleep(2) # break time part 1
 
-            biasFor_ri = self.bias_for_roundNr(ri)
             envE = max(0, self.game.model.E / self.game.n_agents)
             envK = self.game.model.envir.K / self.game.n_agents
-            EnviCondition = min((envE / envK) * (1.0 + biasFor_ri), 1.0)
+            EnviCondition = envE / envK 
             print(f"EnviCondition: {EnviCondition}")
+            
+            
+            if EnviCondition < 0.40 and EnviCondition > 0.30 :
+                # Audio_3_EN duration: 6.713479166666667 Environment: below 40% of resource
+                self.client.PushCommand("play_take", "Audio_3_EN") 
+
+            if EnviCondition > 0.40 and EnviCondition < 0.60 :
+                # Audio_3_EP duration: 7.601645833333333 Environment: above 40% of resource
+                self.client.PushCommand("play_take", "Audio_3_EP") 
+
+            if EnviCondition > 0.60 :
+                # Audio_7_TPP duration: 5.746958333333334 Environment: above 60% of resource
+                self.client.PushCommand("play_take", "Audio_7_TPP") 
+
+            if EnviCondition < 0.60 and EnviCondition > 0.40 :
+                # Audio_7_TPN duration: 5.459604166666667 Environment: below 60% of resource
+                self.client.PushCommand("play_take", "Audio_7_TPN") 
+
+            if EnviCondition < 0.30 :
+                # Audio_11_SN duration: 4.179604166666667 Environment: below 30% of resource
+                self.client.PushCommand("play_take", "Audio_11_SN") 
+    
 
             if EnviCondition < 0.65 and EnviCondition > 0.50:
-                self.client.PushCommand("play_take", "ClimateChange_Instruct_10") # 10 slow down 3s
-                print("Take 10 ......")
                 self.client.PushCommand("set_object_color", "---tree-- #FF0011 2.0") # changes the color of the tree
-                # time.sleep(3)
 
             if EnviCondition < 0.50 and EnviCondition > 0.30 :
-                self.client.PushCommand("play_take", "ClimateChange_Instruct_09") # 09 resources will soon run out 3s
-                print("Take 09 ......")
                 self.client.PushCommand("fade_skybox_tint", "#1111FF 5") # changes color outside the window
-                # time.sleep(3)
 
             if(EnviCondition < 0.30) :
                 self.client.PushCommand("enable_object", "ParticleSystem")
