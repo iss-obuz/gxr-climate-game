@@ -23,8 +23,8 @@ n_players = 2 # number of players plaing the game - not observers
 H_Rate_One_Shot = 0.1 / n_players # 0.2
 
 NickNameToPlayerNR = { # this number indicates to which position the user has been assigned
-    "guestxr.oculusc@gmail.com": 3,         # participant3   oculus C p4
-    "guestxr.oculusd@gmail.com": 1,         # participant1   oculus D p1 
+    "guestxr.oculusc@gmail.com": 2,         # participant3   oculus C p4
+    "guestxr.oculusd@gmail.com": 5,         # participant1   oculus D p1 
     "guestxruw@gmail.com": 5,               # participant5   oculus B p2
 
     "guestxr2@gmail.com": 3,                # participant3   oculus A
@@ -33,7 +33,7 @@ NickNameToPlayerNR = { # this number indicates to which position the user has be
     "weronika.m.lewandowska@gmail.com": 4,  # participant4   Weronika oculus private p3 a wyplata na p5
 
     "manuelzurera@virtualbodyworks.com": 1,
-    "bernhard@kiin.tech": 3,
+    "bernhard@kiin.tech": 5,
     "elena@kiin.tech": 4
 }
 #    "carlos.aguilera@virtualbodyworks.com": 2,
@@ -176,10 +176,11 @@ class Application:
         # Initialize a game object from config dictionary
         self.game = EnvirGame.from_config(n_agents=n_players, K=self.resourceSize, no_behavior=True, noise=0) #T=5 # T regeneracja od 5 do 95% stan srodowiska. T najlepiej nie ruszac 
         self.T = 30 # duration of one round
-        self.NR = 12 # number of rounds
+        self.NR = 8 # number of rounds
         self.i = 0 # number of steps so far in one round
         self.H = np.zeros(self.game.n_agents)
         # self.RLb = np.loadtxt("RL_bias.txt", delimiter=" ") # RL learned bias compensation
+        self.backFromHell = False
  
 
     def get_index_from_cube_id(self, cube_id):
@@ -332,6 +333,7 @@ class Application:
 
         print(f"Users connected (including GuestXR): {self.client.GetPlayersList().Count}")
         self.print_player_list()
+        time.sleep(5)
 
         # synchronization of the start time from Bernhard
         self.customEventTime=datetime.datetime.now
@@ -368,7 +370,7 @@ class Application:
         print(self.NickNameToPlayerIndex)
         print(self.PlayerIndexToPlayerNr)
 
-# Birds can be heard – Play Audio Clip, birds.ogg
+# Birds can be heard  Play Audio Clip, birds.ogg
         self.client.SendGenericCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
        
         # xxx = '''       
@@ -404,7 +406,10 @@ class Application:
 # succeeded
         self.client.PushCommand("play_take", "ClimateChange_Instruct_03")
         print("Take 03 ......")
-        time.sleep(6)
+        time.sleep(6.3)
+     
+        self.client.PushCommand("play_audio_clip", "ping.ogg source 0.1 0.0 false")     
+        time.sleep(2)
         
         foofoo = '''
 # you are from the planet earth
@@ -459,7 +464,7 @@ class Application:
                 print(self.H)
                 self.game.H = self.H
                 self.game.dynamics.run(1 / (self.T*self.NR)) # 1/self.T is an entire epoch in one round, 
-                                                        # because the “run” for 1 is an entire epoch, i.e., a full restoration of the environment
+                                                        # because the run for 1 is an entire epoch, i.e., a full restoration of the environment
                 self.i = self.i+1
                 self.cube_manager.scale_all_objects() # to reverse the scaling effect when the cursor goes off the object
 
@@ -493,45 +498,59 @@ class Application:
             print(f"EnviCondition: {EnviCondition}")
             
             
-            if EnviCondition < 0.40 and EnviCondition > 0.30 :
+            if EnviCondition < 0.40 and EnviCondition > 0.30:
                 # Audio_3_EN duration: 6.713479166666667 Environment: below 40% of resource
-                self.client.PushCommand("play_take", "Audio_3_EN") 
+#                self.client.PushCommand("play_take", "Audio_3_EN") 
+                self.client.PushCommand("play_audio_clip_and_wait", "Audio_3_EN.opus ambientNoise 1.0 0.2 false") 
+                
 
-            if EnviCondition > 0.40 and EnviCondition < 0.60 :
+            if EnviCondition > 0.40 and EnviCondition < 0.50 :
                 # Audio_3_EP duration: 7.601645833333333 Environment: above 40% of resource
-                self.client.PushCommand("play_take", "Audio_3_EP") 
+#                self.client.PushCommand("play_take", "Audio_3_EP")
+                self.client.PushCommand("play_audio_clip_and_wait", "Audio_3_EP.opus ambientNoise 1.0 0.2 false") 
+ 
 
             if EnviCondition > 0.60 :
                 # Audio_7_TPP duration: 5.746958333333334 Environment: above 60% of resource
-                self.client.PushCommand("play_take", "Audio_7_TPP") 
+#                self.client.PushCommand("play_take", "Audio_7_TPP") 
+                self.client.PushCommand("play_audio_clip_and_wait", "Audio_7_TPP.opus ambientNoise 1.0 0.2 false") 
 
-            if EnviCondition < 0.60 and EnviCondition > 0.40 :
+
+            if EnviCondition < 0.60 and EnviCondition > 0.50 :
                 # Audio_7_TPN duration: 5.459604166666667 Environment: below 60% of resource
-                self.client.PushCommand("play_take", "Audio_7_TPN") 
+#                self.client.PushCommand("play_take", "Audio_7_TPN") 
+                self.client.PushCommand("play_audio_clip_and_wait", "Audio_7_TPN.opus ambientNoise 1.0 0.2 false") 
+
 
             if EnviCondition < 0.30 :
                 # Audio_11_SN duration: 4.179604166666667 Environment: below 30% of resource
-                self.client.PushCommand("play_take", "Audio_11_SN") 
+#                self.client.PushCommand("play_take", "Audio_11_SN") 
+                self.client.PushCommand("play_audio_clip_and_wait", "Audio_11_SN.opus ambientNoise 1.0 0.2 false") 
+
     
 
             if EnviCondition < 0.65 and EnviCondition > 0.50:
                 self.client.PushCommand("set_object_color", "---tree-- #FF0011 2.0") # changes the color of the tree
 
             if EnviCondition < 0.50 and EnviCondition > 0.30 :
-                self.client.PushCommand("fade_skybox_tint", "#1111FF 5") # changes color outside the window
+                self.client.PushCommand("fade_skybox_tint", "#6e6e6e 5") # changes color outside the window
 
             if(EnviCondition < 0.30) :
+                self.backFromHell = True
                 self.client.PushCommand("enable_object", "ParticleSystem")
                 self.client.PushCommand("fade_fog_color", "red 0.5")
                 self.client.PushCommand("fade_fog_intensity", "0.5 0.5")
-                self.client.SendGenericCommand("stop_audio_clip", "ambientNoise 1.0")
-            else:
+#                self.client.SendGenericCommand("stop_audio_clip", "ambientNoise 1.0")
+                self.client.PushCommand("play_audio_clip", "Sound_5_Industrial.opus ambientNoise 0.2 1.0 true")
+            elif self.backFromHell :
+                self.backFromHell = False
                 self.client.PushCommand("disable_object", "ParticleSystem")
+#                self.client.SendGenericCommand("stop_audio_clip", "ambientNoise 1.0")
+                self.client.PushCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
 
-            time.sleep(10) # break time part 3
 
-            self.client.PushCommand("set_laser_pointer_active", "true") 
-            print("laser active")
+            time.sleep(10) # break time part 2
+
 
             if EnviCondition > 0.5:
                 self.cube_manager.set_color_all_objects("#40982f") # the color of the cubes becomes green
@@ -541,11 +560,16 @@ class Application:
                 self.cube_manager.set_color_all_objects("#af1010") # color of cubes becomes warning
 
             self.client.PushCommand("play_audio_clip", "ping.ogg source 0.1 0.0 false")
+            time.sleep(2) # break time part 3
+            self.client.PushCommand("set_laser_pointer_active", "true") 
+            print("laser active")
+            time.sleep(1) # break time part 4
 
 # koniec gry #############################################################
  
         self.client.PushCommand("enable_object", "instructor")
-        time.sleep(1)
+        self.client.PushCommand("play_audio_clip", "Sound_6_Fanfares.opus source 0.1 0.0 false")
+        time.sleep(5.16)
         self.client.PushCommand("play_take", "ClimateChange_Instruct_07") # 07 thanks for playing 15s
         print("Take 07 ......")
         time.sleep(30)
