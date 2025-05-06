@@ -18,7 +18,7 @@ from System import EventHandler
 from KiinClient import Guest #, AnimationMode
 
 n_obververs = 0 # number of additional non playing observers
-n_players = 2 # number of players plaing the game - not observers
+n_players = 1 # number of players plaing the game - not observers
 H_Rate_One_Shot = 0.1 / n_players # 0.2
 
 
@@ -224,7 +224,7 @@ class Application:
         # Initialize a game object from config dictionary
         self.game = EnvirGame.from_config(n_agents=n_players, K=self.resourceSize, no_behavior=True, noise=0) #T=5 # T regeneracja od 5 do 95% stan srodowiska. T najlepiej nie ruszac 
         self.T = 30 # duration of one round
-        self.NR = 8 # number of rounds
+        self.NR = 4 # number of rounds
         self.i = 0 # number of steps so far in one round
         self.H = np.zeros(self.game.n_agents)
         # self.RLb = np.loadtxt("RL_bias.txt", delimiter=" ") # RL learned bias compensation
@@ -427,19 +427,20 @@ class Application:
         print(self.PlayerIndexToPlayerNr)
 
 # Birds can be heard – Play Audio Clip, birds.ogg
-        self.client.PushCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
+        self.client.SendGenericCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
        
 # The instructor starts giving instructions about 12 seconds after everyone in the room appears 
-        for i in range(1, 6) :     
+        for i in range(1, 5) :     
             self.client.PushCommand("show_text", f"participant{i}_score_text \"please listen to instruction\" 1.0") 
 
-        self.client.PushCommand("play_take", "Audio_1")
-        print("Take 01 ......")
-        time.sleep(52.062041666666666) # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
+        ## print("Take 01 ......")
+        ## time.sleep(52.062041666666666) # waiting for the end of the clip
 
         print(1, self.isSyncPhase)
+        print("KUPAD I DUPA")
 # Synchronization
-        self.client.PushCommand("play_take", "Audio_2") # zawira ping
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_02") # zawira ping
         print("Take 02 ......")
         time.sleep(60.9959375) # waiting for the end of the clip
 # Play instruciotn sound - is now part of the recording
@@ -452,7 +453,7 @@ class Application:
             waitTimeN += 1
             if waitTimeN % 100 == 0 :
                 # try again
-                self.client.PushCommand("play_take", "Audio_3") # zawira ping
+                self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_03") # zawira ping
                 print("Take 03 ......") # waiting for the end of the clip
                 time.sleep(13.5575625)
         self.cube_manager.set_color_all_objects("#40982f") # the color of the cubes becomes green
@@ -462,22 +463,22 @@ class Application:
         print(2, self.isSyncPhase)
       
 # Audio_4 succeeded
-        self.client.PushCommand("play_take", "Audio_4") 
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04") 
         print("Take 04 ......")
         time.sleep(4.5191875)  # waiting for the end of the clip
      
 # Audio_5
-        self.client.PushCommand("play_take", "Audio_5")
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
         print("Take 05 ......")
         time.sleep(138.266125)  # waiting for the end of the clip
         
 # Audio_6
-        self.client.PushCommand("play_take", "Audio_6")
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
         print("Take 06 ......")
         time.sleep(17.893895833333332)  # waiting for the end of the clip
         
 # Audio_7 
-        self.client.PushCommand("play_take", "Audio_7") # zawiera ping
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_07") # zawiera ping
         print("Take 07 ......")
         time.sleep(22.360833333333332)  # waiting for the end of the clip
 
@@ -540,7 +541,7 @@ class Application:
             self.client.PushCommand("set_laser_pointer_active", "false") 
             print("laser inactive")
             # sygnal poczatku przerwy
-            self.client.PushCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
+            self.client.PushCommand("play_audio_clip", "signal.opus source 0.1 0.0 false")
             self.client.PushCommand("show_text", f"global_message \"Pauze\" 1.0") 
             # wyszarzenie wszyskich kostek na czas przerwy
             self.cube_manager.set_color_all_objects("#777777")
@@ -660,7 +661,7 @@ class Application:
 
             if ri < self.NR - 1 :
                 # koniec rundy - dwieck konca i laser on
-                self.client.PushCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
+                self.client.PushCommand("play_audio_clip", "signal.opus source 0.1 0.0 false")
                 time.sleep(2) # break time part 3 - czas naz miane koloru kostek
                 self.client.PushCommand("set_laser_pointer_active", "true") 
                 print("laser active")
@@ -672,7 +673,7 @@ class Application:
  
         self.client.PushCommand("enable_object", "instructor")
 # Audio_8
-        self.client.PushCommand("play_take", "Audio_8")  # waiting for the end of the clip 
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_08")  # waiting for the end of the clip 
         print("Take 08 ......")
         time.sleep(16.404916666666665)
 
