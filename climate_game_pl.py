@@ -18,7 +18,7 @@ from System import EventHandler
 from KiinClient import Guest #, AnimationMode
 
 n_obververs = 0 # number of additional non playing observers
-n_players = 1 # number of players plaing the game - not observers
+n_players = 2 # number of players plaing the game - not observers
 H_Rate_One_Shot = 0.1 / n_players # 0.2
 
 
@@ -339,15 +339,11 @@ class Application:
             xx_x = args.data["extraData"]["userId"]
             print(f"custom event received, userId: {xx_x}")
             playerId = args.data["extraData"]["userId"].strip()
-#            playerNickname=self.NickNamefromPlayerId(playerId)
-            #if the headset that send the event is in the list of expected players
-            #increase the connecteduserCount
+
             if playerId in NickNameToPlayerNR.keys():
                 self.connectedusers[playerId]=datetime.datetime.now()
             else:
                 print(f"playerid:{playerId} nicktoPlayerNR:{NickNameToPlayerNR.keys()}")
-
-
 
         if args.data["type"] == LiveEventType.ButtonPress.value and self.isSyncPhase:
             self.playersInSync.add(NickNameToPlayerNR[args.data["source_client_id"]])
@@ -416,9 +412,9 @@ class Application:
 # An instructor (instructor or instruction_agent?) is also present in the room.
         time.sleep(1)
         self.client.PushCommand("fade_in", "1.0")      
-        time.sleep(1)        
 # All players are in the room, but they cannot play yet. Their lasers are inactive. 
         self.client.PushCommand("set_laser_pointer_active", "false") # SendGenericCommand
+        time.sleep(1)        
 # Common resource that is, the cubes on the table are gray (inactive).
         self.cube_manager.spawn_all_objects() # I changed that they are gray by default
         time.sleep(1)
@@ -431,22 +427,24 @@ class Application:
         print(self.PlayerIndexToPlayerNr)
 
 # Birds can be heard – Play Audio Clip, birds.ogg
-        self.client.SendGenericCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
+        self.client.PushCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
        
-        # xxx = '''       
 # The instructor starts giving instructions about 12 seconds after everyone in the room appears 
-        for i in range(1, 5) :     
+        for i in range(1, 6) :     
             self.client.PushCommand("show_text", f"participant{i}_score_text \"please listen to instruction\" 1.0") 
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_01")
+
+        self.client.PushCommand("play_take", "Audio_1")
         print("Take 01 ......")
-        time.sleep(44) # 44s - waiting for the end of the instruction clip
-# Play instruciotn sound - is now part of the recording
+        time.sleep(52.062041666666666) # waiting for the end of the clip
+
         print(1, self.isSyncPhase)
 # Synchronization
+        self.client.PushCommand("play_take", "Audio_2") # zawira ping
+        print("Take 02 ......")
+        time.sleep(60.9959375) # waiting for the end of the clip
+# Play instruciotn sound - is now part of the recording
 # sound of the round, then everyone has to press the laser. And all the cubes will be activated.
         self.client.PushCommand("set_laser_pointer_active", "true")  
-        #'''  
-        #self.isSyncPhase = False # tylko do testow - wylaczyc potem
 
         waitTimeN = 0
         while self.isSyncPhase: # is waiting for everyone to use the laser
@@ -454,39 +452,34 @@ class Application:
             waitTimeN += 1
             if waitTimeN % 100 == 0 :
                 # try again
-                self.client.PushCommand("play_take", "ClimateChange_Instruct_02")
-                print("Take 02 ......")
-                time.sleep(10)
+                self.client.PushCommand("play_take", "Audio_3") # zawira ping
+                print("Take 03 ......") # waiting for the end of the clip
+                time.sleep(13.5575625)
         self.cube_manager.set_color_all_objects("#40982f") # the color of the cubes becomes green
         self.client.PushCommand("set_laser_pointer_active", "false")     
         print("laser inactive")
         time.sleep(2)
         print(2, self.isSyncPhase)
       
-# succeeded
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_03")
-        print("Take 03 ......")
-        time.sleep(6.3)
-     
-        self.client.PushCommand("play_audio_clip", "ping.ogg source 0.1 0.0 false")     
-        time.sleep(2)
-        
-        foofoo = '''
-# you are from the planet earth
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04")
+# Audio_4 succeeded
+        self.client.PushCommand("play_take", "Audio_4") 
         print("Take 04 ......")
-        time.sleep(3*60+4)
-        
-# during the game I will be invisible
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
+        time.sleep(4.5191875)  # waiting for the end of the clip
+     
+# Audio_5
+        self.client.PushCommand("play_take", "Audio_5")
         print("Take 05 ......")
-        time.sleep(19)
+        time.sleep(138.266125)  # waiting for the end of the clip
         
-# stay seated and laser synchronization
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
+# Audio_6
+        self.client.PushCommand("play_take", "Audio_6")
         print("Take 06 ......")
-        time.sleep(24)
-'''        
+        time.sleep(17.893895833333332)  # waiting for the end of the clip
+        
+# Audio_7 
+        self.client.PushCommand("play_take", "Audio_7") # zawiera ping
+        print("Take 07 ......")
+        time.sleep(22.360833333333332)  # waiting for the end of the clip
 
         self.gameStarted = True
 
@@ -495,12 +488,11 @@ class Application:
         for i in range(1, 6) :     
             self.client.PushCommand("show_text", f"participant{i}_score_text \"p{i} get: 0\" 1.0") 
 
-
         self.print_player_list()
 
 # Duration of game round: 30s 
 # Pause in the game: 15s
-# Number of rounds: 12
+# Number of rounds: 8
 
 # Start of game loop ######################################################################################
 # round: sound (ping), game clock or: PLAY - play mark on the display - turning on the lasers, color of the deposit
@@ -508,10 +500,9 @@ class Application:
 
         self.client.PushCommand("set_laser_pointer_active", "true") 
         print("laser active")
-        self.client.PushCommand("play_audio_clip", "ping.ogg source 0.1 0.0 false")
-        time.sleep(3) # artificially added delay, because it is not known why, the laser does not immediately turn on. Maybe because of PushCommand
+        # time.sleep(3) # artificially added delay, because it is not known why, the laser does not immediately turn on. Maybe because of PushCommand
 
-        for ri in range(self.NR): # number of rounds: 12
+        for ri in range(self.NR): # number of rounds: 8
             self.client.PushCommand("fade_in", "1.0")      
             self.client.PushCommand("show_text", f"global_message \"Round {ri+1}\" 1.0") 
 
@@ -549,7 +540,7 @@ class Application:
             self.client.PushCommand("set_laser_pointer_active", "false") 
             print("laser inactive")
             # sygnal poczatku przerwy
-            self.client.PushCommand("play_audio_clip", "ping.ogg source 0.1 0.0 false")
+            self.client.PushCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
             self.client.PushCommand("show_text", f"global_message \"Pauze\" 1.0") 
             # wyszarzenie wszyskich kostek na czas przerwy
             self.cube_manager.set_color_all_objects("#777777")
@@ -595,8 +586,7 @@ class Application:
             #################################
                             
             if ri == 0 and "Audio_3_EP_pl" in intervention_set: # Pierwsza interwencja zafiksowana na pierwsza przerwe
-                ## intervention = "audio_15_28_01" #"Audio_3_EP_pl"
-                intervention = "Audio_3_EP_pl"
+                intervention = "Audio_3_EP_pl" 
                 intervention_set -= {intervention}
                 intervention_EP -= {intervention}
             elif x_M and "Audio_4_EN_pl" in intervention_set:
@@ -668,21 +658,23 @@ class Application:
             else:
                 self.cube_manager.set_color_all_objects("#af1010") # color of cubes becomes critical [red]
 
-            # koniec rundy - dwieck konca i laser on
-            self.client.PushCommand("play_audio_clip", "ping.ogg source 0.1 0.0 false")
-            time.sleep(2) # break time part 3 - czas naz miane koloru kostek
-            self.client.PushCommand("set_laser_pointer_active", "true") 
-            print("laser active")
-            time.sleep(1) # break time part 4 - czas na aktywacje lasera
+            if ri < self.NR - 1 :
+                # koniec rundy - dwieck konca i laser on
+                self.client.PushCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
+                time.sleep(2) # break time part 3 - czas naz miane koloru kostek
+                self.client.PushCommand("set_laser_pointer_active", "true") 
+                print("laser active")
+                time.sleep(1) # break time part 4 - czas na aktywacje lasera
+            else : # jak ostatnia runda to nie ma dzieku konca przerwy i nie wlacza sie laser
+                time.sleep(2) # break time part 3 - czas naz miane koloru kostek
 
 # koniec gry #############################################################
  
         self.client.PushCommand("enable_object", "instructor")
-        self.client.PushCommand("play_audio_clip", "Sound_6_Fanfares.opus source 0.1 0.0 false")
-        time.sleep(5.16)
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_07") # 07 thanks for playing 15s
-        print("Take 07 ......")
-        time.sleep(30)
+# Audio_8
+        self.client.PushCommand("play_take", "Audio_8")  # waiting for the end of the clip 
+        print("Take 08 ......")
+        time.sleep(16.404916666666665)
 
 config = None
 with open("SpaceRoom.json", 'r') as file:
