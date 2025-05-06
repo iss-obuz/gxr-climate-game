@@ -430,12 +430,12 @@ class Application:
         self.client.SendGenericCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
        
 # The instructor starts giving instructions about 12 seconds after everyone in the room appears 
-        for i in range(1, 5) :     
+        for i in range(1, 6) :     
             self.client.PushCommand("show_text", f"participant{i}_score_text \"please listen to instruction\" 1.0") 
 
-        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
-        ## print("Take 01 ......")
-        ## time.sleep(52.062041666666666) # waiting for the end of the clip
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
+        print("Take 01 ......")
+        time.sleep(52.062041666666666) # waiting for the end of the clip
 
         print(1, self.isSyncPhase)
         print("KUPAD I DUPA")
