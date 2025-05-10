@@ -71,8 +71,10 @@ intervention_set =  intervention_EN | intervention_EP | intervention_TPP | inter
 
 
 NickNameToPlayerNR = { # this number indicates to which position the user has been assigned
-    "guestxr.oculusc@gmail.com": 2,         # participant3   oculus C p4
-    "guestxr.oculusd@gmail.com": 5,         # participant1   oculus D p1 
+    "guestxr.oculusc@gmail.com": 2,         # Gogle C
+    "guestxr.oculusd@gmail.com": 5,         # Gogle D
+    "guestxroculusa@gmail.com": 3,          # Gogle A
+    "guestxrgogleb@gmail.com": 4,           # Gogle B 
     "guestxruw@gmail.com": 5,               # participant5   oculus B p2
 
     "guestxr2@gmail.com": 3,                # participant3   oculus A
@@ -224,7 +226,7 @@ class Application:
         # Initialize a game object from config dictionary
         self.game = EnvirGame.from_config(n_agents=n_players, K=self.resourceSize, no_behavior=True, noise=0) #T=5 # T regeneracja od 5 do 95% stan srodowiska. T najlepiej nie ruszac 
         self.T = 30 # duration of one round
-        self.NR = 4 # number of rounds
+        self.NR = 8 # number of rounds
         self.i = 0 # number of steps so far in one round
         self.H = np.zeros(self.game.n_agents)
         # self.RLb = np.loadtxt("RL_bias.txt", delimiter=" ") # RL learned bias compensation
@@ -253,16 +255,13 @@ class Application:
     def NickNamefromPlayerId(self,PlayerID):
         playerlist=self.client.GetPlayersList()
         nickname = None
-    #    print(f"voice_client_id:{PlayerID}")
         for player in playerlist:
-    #        print(f"room id:{player.UserId}")
             if player.UserId in PlayerID:
                 nickname=player.NickName
                 break
         return nickname
         
     def print_player_list(self):
-        #print("number of players in room : "+str(len(player_list)))
         for player in self.client.GetPlayersList():
             print(f"nik: {player.NickName} id: {player.UserId}")
 
@@ -425,9 +424,11 @@ class Application:
         print(self.UserIdToPlayerIndex)
         print(self.NickNameToPlayerIndex)
         print(self.PlayerIndexToPlayerNr)
+        
+        self.print_player_list()
 
 # Birds can be heard – Play Audio Clip, birds.ogg
-        self.client.SendGenericCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
+        self.client.PushCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
        
 # The instructor starts giving instructions about 12 seconds after everyone in the room appears 
         for i in range(1, 6) :     
@@ -438,7 +439,6 @@ class Application:
         time.sleep(52.062041666666666) # waiting for the end of the clip
 
         print(1, self.isSyncPhase)
-        print("KUPAD I DUPA")
 # Synchronization
         self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_02") # zawira ping
         print("Take 02 ......")
@@ -462,22 +462,22 @@ class Application:
         time.sleep(2)
         print(2, self.isSyncPhase)
       
-# Audio_4 succeeded
+# ClimateChange_Instruct_pl_04 succeeded
         self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04") 
         print("Take 04 ......")
         time.sleep(4.5191875)  # waiting for the end of the clip
      
-# Audio_5
+# ClimateChange_Instruct_pl_05
         self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
         print("Take 05 ......")
         time.sleep(138.266125)  # waiting for the end of the clip
         
-# Audio_6
+# ClimateChange_Instruct_pl_06
         self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
         print("Take 06 ......")
         time.sleep(17.893895833333332)  # waiting for the end of the clip
         
-# Audio_7 
+# ClimateChange_Instruct_pl_07 
         self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_07") # zawiera ping
         print("Take 07 ......")
         time.sleep(22.360833333333332)  # waiting for the end of the clip
@@ -489,8 +489,14 @@ class Application:
         for i in range(1, 6) :     
             self.client.PushCommand("show_text", f"participant{i}_score_text \"p{i} get: 0\" 1.0") 
 
-        self.print_player_list()
-
+# Disabling verbal communication between players – they should not be able to hear each other once the game starts (after Audio 7).        
+        # set_character_audio_volume {character_id} {target_volume} {fade_in_time} 
+        for userID in self.UserIdToPlayerIndex.keys() :
+            self.client.PushCommand("set_character_audio_volume", f"{userID} 0.0 0.5")
+        # # or ????
+        # for i in range(1, 6) :     
+        #     self.client.PushCommand("set_character_audio_volume", f"participant{i} 0.0 0.5")
+        
 # Duration of game round: 30s 
 # Pause in the game: 15s
 # Number of rounds: 8
@@ -541,7 +547,7 @@ class Application:
             self.client.PushCommand("set_laser_pointer_active", "false") 
             print("laser inactive")
             # sygnal poczatku przerwy
-            self.client.PushCommand("play_audio_clip", "signal.opus source 0.1 0.0 false")
+            self.client.PushCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
             self.client.PushCommand("show_text", f"global_message \"Pauze\" 1.0") 
             # wyszarzenie wszyskich kostek na czas przerwy
             self.cube_manager.set_color_all_objects("#777777")
@@ -586,7 +592,7 @@ class Application:
             ###### interwencje GuestXR ######
             #################################
                             
-            if ri == 0 and "Audio_3_EP_pl" in intervention_set: # Pierwsza interwencja zafiksowana na pierwsza przerwe
+            if 0.7 < EnviCondition and "Audio_3_EP_pl" in intervention_set: # Pierwsza interwencja zafiksowana na pierwsza przerwe
                 intervention = "Audio_3_EP_pl" 
                 intervention_set -= {intervention}
                 intervention_EP -= {intervention}
@@ -661,7 +667,7 @@ class Application:
 
             if ri < self.NR - 1 :
                 # koniec rundy - dwieck konca i laser on
-                self.client.PushCommand("play_audio_clip", "signal.opus source 0.1 0.0 false")
+                self.client.PushCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
                 time.sleep(2) # break time part 3 - czas naz miane koloru kostek
                 self.client.PushCommand("set_laser_pointer_active", "true") 
                 print("laser active")
@@ -672,7 +678,7 @@ class Application:
 # koniec gry #############################################################
  
         self.client.PushCommand("enable_object", "instructor")
-# Audio_8
+# ClimateChange_Instruct_pl_08
         self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_08")  # waiting for the end of the clip 
         print("Take 08 ......")
         time.sleep(16.404916666666665)
