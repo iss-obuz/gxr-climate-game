@@ -1,6 +1,10 @@
+# %%
+## Import modules
 import numpy as np
 from gxr.envir import EnvirGame
 import json
+from pathlib import Path
+import os
 
 import datetime
 
@@ -17,9 +21,16 @@ from System import EventHandler
 
 from KiinClient import Guest #, AnimationMode
 
+# %%
+## Define globals
+ROOT = Path(__file__).absolute().parent
+DATA = ROOT / "data"
+if not os.path.exists(DATA):
+    os.makedirs(DATA)
 n_obververs = 0 # number of additional non playing observers
 n_players = 1 # number of players plaing the game - not observers
 H_Rate_One_Shot = 0.1 / n_players # 0.2
+file_name =  datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
 
 
 ###### interwencje GuestXR ######
@@ -101,6 +112,8 @@ wealth_objects= [
     'commons_house'
 ]
 
+# %%
+## Define classes and functions
 class LiveEventType(Enum):
     ButtonPress = 0
     VoiceActivity = auto()
@@ -513,31 +526,43 @@ class Application:
             self.client.PushCommand("fade_in", "1.0")      
             self.client.PushCommand("show_text", f"global_message \"Round {ri+1}\" 1.0") 
 
-            while self.i < self.T : # Duration of a game round: 30s
+            with open(DATA / f"{file_name}_round_{ri}.jsonl", "w") as file:
+                while self.i < self.T : # Duration of a game round: 30s
                 
-                self.H = np.zeros(self.game.n_agents)
-                time.sleep(1.0)   # every 1s the state of the game and the environment is updated 
+                    self.H = np.zeros(self.game.n_agents)
+                    time.sleep(1.0)   # every 1s the state of the game and the environment is updated 
                                 # attention! it affects the duration of the round
 
-                print(self.H)
-                self.game.H = self.H
-                self.game.dynamics.run(1 / (self.T*self.NR)) # 1/self.T is an entire epoch in one round, 
+                    print(self.H)
+                    self.game.H = self.H
+                    self.game.dynamics.run(1 / (self.T*self.NR)) # 1/self.T is an entire epoch in one round, 
                                                         # because the “run” for 1 is an entire epoch, i.e., a full restoration of the environment
-                self.i = self.i+1
-                self.cube_manager.scale_all_objects() # to reverse the scaling effect when the cursor goes off the object
+                    self.i = self.i+1
+                    self.cube_manager.scale_all_objects() # to reverse the scaling effect when the cursor goes off the object
 
-                envE = max(0, self.game.model.E / self.game.n_agents)
-                envK = self.game.model.envir.K / self.game.n_agents
-                self.cube_manager.sync_with_Et(envE, envK)
+                    envE = max(0, self.game.model.E / self.game.n_agents)
+                    envK = self.game.model.envir.K / self.game.n_agents
+                    self.cube_manager.sync_with_Et(envE, envK)
                 
-                print(f"Et:EK:rQ:aQ:Et/EK: {envE} : {envK} : {len(self.cube_manager.removed_cubes)} : {len(self.cube_manager.avaliable_cubes)} : {envE/envK}")
-                # print(self.cube_manager.cubeScale)
+                    print(f"Et:EK:rQ:aQ:Et/EK: {envE} : {envK} : {len(self.cube_manager.removed_cubes)} : {len(self.cube_manager.avaliable_cubes)} : {envE/envK}")
+                    # print(self.cube_manager.cubeScale)
+                    wealth_dct = {}
+                    for p_i in range(self.game.n_agents):
+                        player_n = self.PlayerIndexToPlayerNr[p_i]
+                        score_str=f"participant{player_n}_score_text \"p{player_n} get: {round(self.game.U[p_i], 2)}\" 1" 
+                        self.client.SendGenericCommand("show_text", score_str) 
+                        self.update_wealth(p_i, player_n)
+                        wealth_dct[player_n] = round(self.game.U[p_i],2)
 
-                for p_i in range(self.game.n_agents):
-                    player_n = self.PlayerIndexToPlayerNr[p_i]
-                    score_str=f"participant{player_n}_score_text \"p{player_n} get: {round(self.game.U[p_i], 2)}\" 1" 
-                    self.client.SendGenericCommand("show_text", score_str) 
-                    self.update_wealth(p_i, player_n)
+                    tmp = {
+                        "Et": envE,
+                        "EK": envK,
+                        "rQ": len(self.cube_manager.removed_cubes),
+                        "aQ": len(self.cube_manager.avaliable_cubes),
+                        "Enviornment Condition": envE/envK,
+                        **wealth_dct
+                    }
+                    file.write(json.dumps(tmp) + "\n")
 
                 
 # Pause in the game: 15s ################################################################
@@ -683,10 +708,15 @@ class Application:
         print("Take 08 ......")
         time.sleep(16.404916666666665)
 
-config = None
-with open("SpaceRoom.json", 'r') as file:
-    config = json.load(file)
+def main() -> None:
+    config = None
+    with open("SpaceRoom.json", 'r') as file:
+        config = json.load(file)
          
-app = Application(config)
-print("test_app")
-app.connect()
+    app = Application(config)
+    print("test_app")
+    app.connect()
+
+# %%
+if __name__ in "__main__":
+    main()
