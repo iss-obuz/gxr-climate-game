@@ -28,28 +28,17 @@ DATA = ROOT / "data"
 if not os.path.exists(DATA):
     os.makedirs(DATA)
 n_obververs = 0 # number of additional non playing observers
-n_players = 1 # number of players plaing the game - not observers
+n_players = 3 # number of players plaing the game - not observers
 H_Rate_One_Shot = 0.1 / n_players # 0.2
 file_name =  datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
+
+sex_users = {
+    
+}
 
 
 ###### interwencje GuestXR ######
 #################################
-# zbior mozliwych interwencjie
-# "Audio_1_EN_pl",
-# "Audio_3_EN_pl",
-# "Audio_4_EN_pl",
-# "Audio_3_EP_pl",
-# "Audio_4_EP_pl",
-# "Audio_1_EP_pl",
-# "Audio_6_TPP_pl",
-# "Audio_7_TPP_pl",
-# "Audio_6_TPN_pl",
-# "Audio_7_TPN_pl",
-# "Audio_9_SN_pl",
-# "Audio_12_SN_pl",
-# "Audio_9_SP_pl",
-# "Audio_12_SP_pl"
 
 intervention_EP = {
     "Audio_3_EP_pl",
@@ -97,9 +86,6 @@ NickNameToPlayerNR = { # this number indicates to which position the user has be
     "bernhard@kiin.tech": 5,
     "elena@kiin.tech": 4
 }
-#    "carlos.aguilera@virtualbodyworks.com": 2,
-#    "roger@vbw.com":5
-
 
 wealth_objects= [
     'commons_one_coin',
@@ -340,10 +326,6 @@ class Application:
             self.client.PushCommand("enable_object",  f"participant{player_n}_{wealth_objects[7]}") 
             self.playersWealthDistribution[player_i] = 8 # Wealth level 
     
-    # compute fias for given round (rounds counts form 0 to NR-1)
-    # def bias_for_roundNr(self, roundNr):
-    #     return self.RLb[int((roundNr)*len(self.RLb)/(self.NR-0.999))][1]
-    
     def handler(self, source, args):
         
         # to synchronize the starting moment        
@@ -418,7 +400,15 @@ class Application:
         time.sleep(1)   
         self.client.PushCommand("disable_object", "ParticleSystem")
 
-        self.client.PushCommand("show_text", "global_message \"Welcome :)\" 1.0") 
+        self.client.PushCommand("show_text", "global_message \"Cześć!\" 1.0") 
+        ## df3acd8e-7c3a-4461-82ec-ed15ae3f1a88 - woman_rich
+        ## beff84fc-983d-4fa0-baf4-b0f22da3706c - woman_poor
+        ## 0f9d8310-48a1-4043-82f0-de73363ee0f3 - woman_medium
+        ## b6b2c370-e228-40ef-b7e8-f5f331d77275 - man_rich
+        ## 82c95958-3b63-4eea-9ef8-814000fb80b6 - man_poor
+        ## 47f0f240-5e4a-4ad8-90b5-4a49563a08fc - man_medium
+        for userID in self.UserIdToPlayerIndex.keys():
+            self.client.SetNewAvatar(userID,"df3acd8e-7c3a-4461-82ec-ed15ae3f1a88")
 
 # After all the players appear, the text disappears, the room becomes visible. 
 # An instructor (instructor or instruction_agent?) is also present in the room.
@@ -445,17 +435,17 @@ class Application:
        
 # The instructor starts giving instructions about 12 seconds after everyone in the room appears 
         for i in range(1, 6) :     
-            self.client.PushCommand("show_text", f"participant{i}_score_text \"please listen to instruction\" 1.0") 
+            self.client.PushCommand("show_text", f"participant{i}_score_text \"Proszę skup się teraz na instrukcji\" 1.0") 
 
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
-        print("Take 01 ......")
-        time.sleep(52.062041666666666) # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
+        ## print("Take 01 ......")
+        ## time.sleep(52.062041666666666) # waiting for the end of the clip
 
         print(1, self.isSyncPhase)
 # Synchronization
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_02") # zawira ping
-        print("Take 02 ......")
-        time.sleep(60.9959375) # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_02") # zawira ping
+        ## print("Take 02 ......")
+        ## time.sleep(60.9959375) # waiting for the end of the clip
 # Play instruciotn sound - is now part of the recording
 # sound of the round, then everyone has to press the laser. And all the cubes will be activated.
         self.client.PushCommand("set_laser_pointer_active", "true")  
@@ -476,39 +466,36 @@ class Application:
         print(2, self.isSyncPhase)
       
 # ClimateChange_Instruct_pl_04 succeeded
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04") 
-        print("Take 04 ......")
-        time.sleep(4.5191875)  # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04") 
+        ## print("Take 04 ......")
+        ## time.sleep(4.5191875)  # waiting for the end of the clip
      
 # ClimateChange_Instruct_pl_05
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
-        print("Take 05 ......")
-        time.sleep(138.266125)  # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
+        ## print("Take 05 ......")
+        ## time.sleep(138.266125)  # waiting for the end of the clip
         
 # ClimateChange_Instruct_pl_06
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
-        print("Take 06 ......")
-        time.sleep(17.893895833333332)  # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
+        ## print("Take 06 ......")
+        ## time.sleep(17.893895833333332)  # waiting for the end of the clip
         
 # ClimateChange_Instruct_pl_07 
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_07") # zawiera ping
-        print("Take 07 ......")
-        time.sleep(22.360833333333332)  # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_07") # zawiera ping
+        ## print("Take 07 ......")
+        ## time.sleep(22.360833333333332)  # waiting for the end of the clip
 
         self.gameStarted = True
 
 # The game begins. The instructor's avatar disappears. Lasers are active.
         self.client.PushCommand("disable_object", "instructor") # "instruction_agent")  # instructor The_Guest ?? How to disable instruction_agent???
         for i in range(1, 6) :     
-            self.client.PushCommand("show_text", f"participant{i}_score_text \"p{i} get: 0\" 1.0") 
+            self.client.PushCommand("show_text", f"participant{i}_score_text \"p{i} Zasoby: 0\" 1.0") 
 
 # Disabling verbal communication between players – they should not be able to hear each other once the game starts (after Audio 7).        
         # set_character_audio_volume {character_id} {target_volume} {fade_in_time} 
         for userID in self.UserIdToPlayerIndex.keys() :
             self.client.PushCommand("set_character_audio_volume", f"{userID} 0.0 0.5")
-        # # or ????
-        # for i in range(1, 6) :     
-        #     self.client.PushCommand("set_character_audio_volume", f"participant{i} 0.0 0.5")
         
 # Duration of game round: 30s 
 # Pause in the game: 15s
@@ -524,7 +511,7 @@ class Application:
 
         for ri in range(self.NR): # number of rounds: 8
             self.client.PushCommand("fade_in", "1.0")      
-            self.client.PushCommand("show_text", f"global_message \"Round {ri+1}\" 1.0") 
+            self.client.PushCommand("show_text", f"global_message \"Runda {ri+1}\" 1.0") 
 
             with open(DATA / f"{file_name}_round_{ri}.jsonl", "w") as file:
                 while self.i < self.T : # Duration of a game round: 30s
@@ -549,7 +536,7 @@ class Application:
                     wealth_dct = {}
                     for p_i in range(self.game.n_agents):
                         player_n = self.PlayerIndexToPlayerNr[p_i]
-                        score_str=f"participant{player_n}_score_text \"p{player_n} get: {round(self.game.U[p_i], 2)}\" 1" 
+                        score_str=f"participant{player_n}_score_text \"Posiadane zasoby: {round(self.game.U[p_i], 2)}\" 1" 
                         self.client.SendGenericCommand("show_text", score_str) 
                         self.update_wealth(p_i, player_n)
                         wealth_dct[player_n] = round(self.game.U[p_i],2)
@@ -572,8 +559,8 @@ class Application:
             self.client.PushCommand("set_laser_pointer_active", "false") 
             print("laser inactive")
             # sygnal poczatku przerwy
-            self.client.PushCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
-            self.client.PushCommand("show_text", f"global_message \"Pauze\" 1.0") 
+            self.client.SendGenericCommand("play_audio_clip", "signal.ogg source 0.1 0.0 false")
+            self.client.PushCommand("show_text", f"global_message \"Przerwa\" 1.0") 
             # wyszarzenie wszyskich kostek na czas przerwy
             self.cube_manager.set_color_all_objects("#777777")
             time.sleep(2) # break time part 1 - czas na zakonczenie wyszarzania kostek
@@ -617,7 +604,8 @@ class Application:
             ###### interwencje GuestXR ######
             #################################
                             
-            if 0.7 < EnviCondition and "Audio_3_EP_pl" in intervention_set: # Pierwsza interwencja zafiksowana na pierwsza przerwe
+            ## if 0.7 < EnviCondition and "Audio_3_EP_pl" in intervention_set: # Pierwsza interwencja zafiksowana na pierwsza przerwe
+            if ri == 0 and "Audio_3_EP_pl" in intervention_set: # Pierwsza interwencja zafiksowana na pierwsza przerwe
                 intervention = "Audio_3_EP_pl" 
                 intervention_set -= {intervention}
                 intervention_EP -= {intervention}
@@ -654,36 +642,37 @@ class Application:
             # wykonanie wybranej interwencji glosowej
             if intervention != "":
                 print(f"play_audio_clip :: {intervention}.opus")
-                self.client.PushCommand("play_audio_clip", f"{intervention}.opus ambientNoise 1.0 0.2 false") 
+                self.client.PushCommand("play_audio_clip", f"{intervention}.opus ambientNoise 1.0 1.0 false") 
                 
-                
-# uwaga! przegadac kiedy drzewo i za oknem ma wracac do stanu normalnego
-            # zmiana koloru drzewa
-            if 0.50 < EnviCondition < 0.65:
+            # Zmiana kolory drzewa na czerwone
+            if EnviCondition < 0.5:
                 self.client.PushCommand("set_object_color", "---tree-- #FF0011 2.0") # changes the color of the tree
-            # zmiana koloru srodowiska za oknem
-            if 0.3 < EnviCondition <= 0.50 :
-                self.client.PushCommand("fade_skybox_tint", "#6e6e6e 5") # changes color outside the window
+            else:
+                self.client.PushCommand("set_object_color", "---tree-- #FFFFFF 2.0") # changes the color of the tree
+                
+            # Zmiana koloru środowiska na czerwone
+            if EnviCondition < .7:
+                self.client.PushCommand("fade_skybox_tint", "#FF0011 5") # changes color outside the window
+            else:
+                self.client.PushCommand("fade_skybox_tint", "#FFFFFF 5") # changes color outside the window
+                self.client.PushCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true") # birds
 
             # aktywacja mgly i efekty dwiekowe
-            if EnviCondition <= 0.30 : # aktywacja mgły
+            if EnviCondition <= 0.3: # aktywacja mgły
                 self.backFromHell = True
                 self.client.PushCommand("enable_object", "ParticleSystem")
                 self.client.PushCommand("fade_fog_color", "red 0.5")
                 self.client.PushCommand("fade_fog_intensity", "0.5 0.5")
-#                self.client.SendGenericCommand("stop_audio_clip", "ambientNoise 1.0")
                 self.client.PushCommand("play_audio_clip", "Sound_5_Industrial.opus ambientNoise 0.2 1.0 true")
-            elif self.backFromHell :
+            elif self.backFromHell:
                 self.backFromHell = False
                 self.client.PushCommand("disable_object", "ParticleSystem")
-#                self.client.SendGenericCommand("stop_audio_clip", "ambientNoise 1.0")
-                self.client.PushCommand("play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true")
 
 
             time.sleep(10) # break time part 2 - w tym czasie napewno zmieszcza sie interwnecje w tym gloswe
 
             # Aktualizcja koloru kostek
-            if 0.5 < EnviCondition :
+            if 0.5 < EnviCondition:
                 self.cube_manager.set_color_all_objects("#40982f") # the color of the cubes becomes ok [green]
             elif 0.3 < EnviCondition :
                 self.cube_manager.set_color_all_objects("#af9410") # color of cubes becomes warning [orange]
@@ -692,7 +681,8 @@ class Application:
 
             if ri < self.NR - 1 :
                 # koniec rundy - dwieck konca i laser on
-                self.client.PushCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
+                self.client.SendGenericCommand("play_audio_clip", "signal.opus source 1.0 0.0 false")
+                self.client.SendGenericCommand("play_audio_clip", "friend_request.ogg source 0.1 0.0 false")
                 time.sleep(2) # break time part 3 - czas naz miane koloru kostek
                 self.client.PushCommand("set_laser_pointer_active", "true") 
                 print("laser active")
