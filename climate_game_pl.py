@@ -25,7 +25,7 @@ if not os.path.exists(DATA):
 # %%
 ## Define globals
 n_obververs = 0  ## number of additional non playing observers
-n_players = 3  ## number of players plaing the game - not observersa
+n_players = 1  ## number of players plaing the game - not observersa
 nr_rounds = 8  ## Number of rounds
 H_Rate_One_Shot = 0.1 / n_players  ## How much the single shot takes of the resource
 file_name = datetime.datetime.now().strftime(
@@ -37,7 +37,8 @@ sex_users = {
     "guestxr.oculusc@gmail.com": "man",
     "weronika.m.lewandowska@gmail.com": "woman",
     "guestxr.oculusd@gmail.com": "woman",
-    "guestxroculusa@gmail.com" : "woman"
+    "guestxroculusa@gmail.com": "woman",
+    "guestxrgogleb@gmail.com": "woman",
 }
 
 ## Emails to sits (locations around the table.
@@ -237,6 +238,18 @@ class Application:
             0
         ] * self.game.n_agents  # poziomy bogactwa graczy
         self.sex_users = {}
+        self._wealth_dct = {}
+        self._eqaul_wealth = True
+
+    def _compute_equality(self):
+        """Computes equality in wealth. And set self._equality_wealth to either True or False."""
+        min_wealth = abs(min(self._wealth_dct.values()))
+        max_wealth = abs(max(self._wealth_dct.values()))
+
+        if max_wealth - min_wealth < 4:
+            self._eqaul_wealth = True
+        else:
+            self._eqaul_wealth = False
 
     def _set_avatars(self) -> None:
         """Sets the sex of avatars.
@@ -286,7 +299,6 @@ class Application:
             _description_, by default sex_users
         """
         self.sex_users = dct
-        
 
     def get_index_from_cube_id(self, cube_id):
         x = int(cube_id[len(cube_id) - 3]) - 1
@@ -532,7 +544,7 @@ class Application:
         self.client.PushCommand("disable_object", "ParticleSystem")
 
         self.client.PushCommand("show_text", 'global_message "Cześć!" 1.0')
-        
+
         ## Set the sex of avatars.
         self._set_avatars()
 
@@ -569,54 +581,54 @@ class Application:
                 f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
             )
 
-        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
-        ## print("Take 01 ......")
-        ## time.sleep(52.062041666666666)  # waiting for the end of the clip
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
+        print("Take 01 ......")
+        time.sleep(52.062041666666666)  # waiting for the end of the clip
 
         print(1, self.isSyncPhase)
         # Synchronization
-        ## self.client.PushCommand(
-        ##     "play_take", "ClimateChange_Instruct_pl_02"
-        ## )  # zawira ping
-        ## print("Take 02 ......")
-        ## time.sleep(60.9959375)  # waiting for the end of the clip
+        self.client.PushCommand(
+            "play_take", "ClimateChange_Instruct_pl_02"
+        )  # zawira ping
+        print("Take 02 ......")
+        time.sleep(60.9959375)  # waiting for the end of the clip
         # Play instruciotn sound - is now part of the recording
         # sound of the round, then everyone has to press the laser. And all the cubes will be activated.
-        ## self.client.PushCommand("set_laser_pointer_active", "true")
+        self.client.PushCommand("set_laser_pointer_active", "true")
 
-        ## waitTimeN = 0
-        ## while self.isSyncPhase:  # is waiting for everyone to use the laser
-        ##     time.sleep(0.1)
-        ##     waitTimeN += 1
-        ##     if waitTimeN % 100 == 0:
-        ##         # try again
-        ##         self.client.PushCommand(
-        ##             "play_take", "ClimateChange_Instruct_pl_03"
-        ##         )  # zawira ping
-        ##         print("Take 03 ......")  # waiting for the end of the clip
-        ##         time.sleep(13.5575625)
+        waitTimeN = 0
+        while self.isSyncPhase:  # is waiting for everyone to use the laser
+            time.sleep(0.1)
+            waitTimeN += 1
+            if waitTimeN % 100 == 0:
+                # try again
+                self.client.PushCommand(
+                    "play_take", "ClimateChange_Instruct_pl_03"
+                )  # zawira ping
+                print("Take 03 ......")  # waiting for the end of the clip
+                time.sleep(13.5575625)
         self.cube_manager.set_color_all_objects(
             "#40982f"
         )  # the color of the cubes becomes green
-        ## self.client.PushCommand("set_laser_pointer_active", "false")
-        ## print("laser inactive")
-        ## time.sleep(2)
-        ## print(2, self.isSyncPhase)
+        self.client.PushCommand("set_laser_pointer_active", "false")
+        print("laser inactive")
+        time.sleep(2)
+        print(2, self.isSyncPhase)
 
         # ClimateChange_Instruct_pl_04 succeeded
-        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04")
-        ## print("Take 04 ......")
-        ## time.sleep(4.5191875)  # waiting for the end of the clip
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04")
+        print("Take 04 ......")
+        time.sleep(4.5191875)  # waiting for the end of the clip
 
         # ClimateChange_Instruct_pl_05
-        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
-        ## print("Take 05 ......")
-        ## time.sleep(138.266125)  # waiting for the end of the clip
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
+        print("Take 05 ......")
+        time.sleep(138.266125)  # waiting for the end of the clip
 
         # ClimateChange_Instruct_pl_06
-        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
-        ## print("Take 06 ......")
-        ## time.sleep(17.893895833333332)  # waiting for the end of the clip
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
+        print("Take 06 ......")
+        time.sleep(17.893895833333332)  # waiting for the end of the clip
 
         # ClimateChange_Instruct_pl_07
         self.client.PushCommand(
@@ -650,7 +662,7 @@ class Application:
         self.client.PushCommand("set_laser_pointer_active", "true")
         print("laser active")
         time.sleep(
-            5
+            0
         )  # artificially added delay, because it is not known why, the laser does not immediately turn on. Maybe because of PushCommand
         self.gameStarted = True
         EnviCondition_start = 1
@@ -658,7 +670,9 @@ class Application:
         for ri in range(self.NR):  # number of rounds: 8
             self.client.PushCommand("fade_in", "1.0")
             self.client.PushCommand("show_text", f'global_message "Runda {ri + 1}" 1.0')
-            
+            if ri == 0:
+                time.sleep(4)
+
             with open(DATA / f"{file_name}_round_{ri}.jsonl", "w") as file:
                 while self.i < self.T:  # Duration of a game round: 30s
                     self.H = np.zeros(self.game.n_agents)
@@ -683,14 +697,13 @@ class Application:
                     print(
                         f"Et:EK:rQ:aQ:Et/EK: {envE} : {envK} : {len(self.cube_manager.removed_cubes)} : {len(self.cube_manager.avaliable_cubes)} : {envE / envK}"
                     )
-                    # print(self.cube_manager.cubeScale)
-                    wealth_dct = {}
+
                     for p_i in range(self.game.n_agents):
                         player_n = self.PlayerIndexToPlayerNr[p_i]
                         score_str = f'participant{player_n}_score_text "Posiadane zasoby: {round(self.game.U[p_i], 2)}" 1'
                         self.client.SendGenericCommand("show_text", score_str)
                         self.update_wealth(p_i, player_n)
-                        wealth_dct[player_n] = round(self.game.U[p_i], 2)
+                        self.wealth_dct[player_n] = round(self.game.U[p_i], 2)
 
                     tmp = {
                         "Et": envE,
@@ -698,7 +711,7 @@ class Application:
                         "rQ": len(self.cube_manager.removed_cubes),
                         "aQ": len(self.cube_manager.avaliable_cubes),
                         "Enviornment Condition": envE / envK,
-                        **wealth_dct,
+                        **self._wealth_dct,
                     }
                     file.write(json.dumps(tmp) + "\n")
 
@@ -723,92 +736,66 @@ class Application:
             EnviCondition = envE / envK
             print(f"EnviCondition: {EnviCondition}")
 
-            ## ustalenie parametrow do interwecnji GuestXR
-
-            # 1. Środowisko (kostki)
-            if 0.5 < EnviCondition:  # the color of the cubes becomes ok [green]
-                x_EP = True
-                x_EN = not x_EP
-            elif 0.3 < EnviCondition:  # color of cubes becomes warning [orange]
-                x_EP = False
-                x_EN = not x_EP
-            else:  # color of cubes becomes critical [red]
-                x_EP = False
-                x_EN = not x_EP
-
-            # 2. Środowisko (mgła)
-            if EnviCondition <= 0.30:  # aktywacja mgły
-                x_M = True
-                x_BM = not x_M  ## noqa
-            else:
-                x_M = False
-                x_BM = not x_M  ## noqa
-
-            min_wealth = abs(min(wealth_dct.value()))
-            max_wealth = abs(max(wealth_dct.values()))
-
-            if max_wealth - min_wealth < 4:
-                equal_wealth = True
-            else:
-                equal_wealth = False
+            ## Compute the wealth equality
+            self._compute_equality()
 
             ###### interwencje GuestXR ######
             #################################
 
-            if ri == 3:
+            if ri == 0:
                 intervention = ""
-                if EnviCondition > .5:
+                if EnviCondition > 0.5:
                     intervention = "Audio_7_TPP_pl"
-                    
+
                 else:
                     intervention = "Audio_7_TPN_pl"
-                    
+
             elif ri == 1:
                 intervention = ""
-                if EnviCondition > .5:
+                if EnviCondition > 0.5:
                     intervention = "Audio_6_TPP_pl"
-                    
+
                 else:
                     intervention = "Audio_6_TPN_pl"
-                         
+
             elif ri == 2:
                 intervention = ""
-                if EnviCondition > .5:
+                if EnviCondition > 0.5:
                     intervention = "Audio_6_TPP_pl"
-                    
-                elif EnviCondition < .3:
+
+                elif EnviCondition < 0.3:
                     intervention = "Audio_6_TPN_pl"
-                    
+
                 else:
                     intervention = ""
-            elif ri == 0:
+            elif ri == 3:
                 intervention = ""
-                if equal_wealth:
+                if self._equal_wealth:
                     intervention = "Audio_12_SP_pl"
                 else:
                     intervention = "Audio_12_SN_pl"
             elif ri == 4:
                 intervention = ""
-                if EnviCondition_start - EnviCondition > .2:
+                if EnviCondition_start - EnviCondition > 0.2:
                     intervention = "Audio_1_EN_pl"
-                elif EnviCondition - EnviCondition_start > .2 and EnviCondition > .3:
+                elif EnviCondition - EnviCondition_start > 0.2 and EnviCondition > 0.3:
                     intervention = "Audio_1_EP_pl"
             elif ri == 5:
                 intervention = ""
-                if EnviCondition > .4:
+                if EnviCondition > 0.4:
                     intervention = "Audio_3_EP_pl"
                 else:
                     intervention = "Audio_3_EN_pl"
 
             elif ri == 6:
                 intervention = ""
-                if equal_wealth:
+                if self._equal_wealth:
                     intervention = "Audio_9_SP_pl"
                 else:
                     intervention = "Audio_9_SN_pl"
             else:
                 intervention = ""
-            
+
             # wykonanie wybranej interwencji glosowej
             if intervention != "":
                 print(f"play_audio_clip :: {intervention}.opus")
@@ -828,7 +815,7 @@ class Application:
                 )  # changes the color of the tree
 
             # Zmiana koloru środowiska na czerwone
-            if EnviCondition < 0.7:
+            if EnviCondition < 0.5:
                 self.client.PushCommand(
                     "fade_skybox_tint", "#FF0011 5"
                 )  # changes color outside the window
