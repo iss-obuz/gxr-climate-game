@@ -703,7 +703,7 @@ class Application:
                         score_str = f'participant{player_n}_score_text "Posiadane zasoby: {round(self.game.U[p_i], 2)}" 1'
                         self.client.SendGenericCommand("show_text", score_str)
                         self.update_wealth(p_i, player_n)
-                        self.wealth_dct[player_n] = round(self.game.U[p_i], 2)
+                        self._wealth_dct[player_n] = round(self.game.U[p_i], 2)
 
                     tmp = {
                         "Et": envE,
