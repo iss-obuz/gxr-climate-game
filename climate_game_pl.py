@@ -36,14 +36,15 @@ file_name = datetime.datetime.now().strftime(
 sex_users = {
     "guestxr.oculusc@gmail.com": "man",
     "weronika.m.lewandowska@gmail.com": "woman",
-    "guestxr.oculusd@gmail.com": "man",
+    "guestxr.oculusd@gmail.com": "woman",
+    "guestxroculusa@gmail.com" : "woman"
 }
 
 ## Emails to sits (locations around the table.
 NickNameToPlayerNR = {  # this number indicates to which position the user has been assigned
     "guestxr.oculusc@gmail.com": 2,  # Gogle C
     "guestxr.oculusd@gmail.com": 5,  # Gogle D
-    "guestxroculusa@gmail.com": 3,  # Gogle A
+    "guestxroculusa@gmail.com": 1,  # Gogle A
     "guestxrgogleb@gmail.com": 4,  # Gogle B
     "guestxruw@gmail.com": 5,  # participant5   oculus B p2
     "guestxr2@gmail.com": 3,  # participant3   oculus A
@@ -285,7 +286,7 @@ class Application:
             _description_, by default sex_users
         """
         self.sex_users = dct
-        self._set_avatars()
+        
 
     def get_index_from_cube_id(self, cube_id):
         x = int(cube_id[len(cube_id) - 3]) - 1
@@ -531,6 +532,9 @@ class Application:
         self.client.PushCommand("disable_object", "ParticleSystem")
 
         self.client.PushCommand("show_text", 'global_message "Cześć!" 1.0')
+        
+        ## Set the sex of avatars.
+        self._set_avatars()
 
         # After all the players appear, the text disappears, the room becomes visible.
         # An instructor (instructor or instruction_agent?) is also present in the room.
@@ -565,54 +569,54 @@ class Application:
                 f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
             )
 
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
-        print("Take 01 ......")
-        time.sleep(52.062041666666666)  # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
+        ## print("Take 01 ......")
+        ## time.sleep(52.062041666666666)  # waiting for the end of the clip
 
         print(1, self.isSyncPhase)
         # Synchronization
-        self.client.PushCommand(
-            "play_take", "ClimateChange_Instruct_pl_02"
-        )  # zawira ping
-        print("Take 02 ......")
-        time.sleep(60.9959375)  # waiting for the end of the clip
+        ## self.client.PushCommand(
+        ##     "play_take", "ClimateChange_Instruct_pl_02"
+        ## )  # zawira ping
+        ## print("Take 02 ......")
+        ## time.sleep(60.9959375)  # waiting for the end of the clip
         # Play instruciotn sound - is now part of the recording
         # sound of the round, then everyone has to press the laser. And all the cubes will be activated.
-        self.client.PushCommand("set_laser_pointer_active", "true")
+        ## self.client.PushCommand("set_laser_pointer_active", "true")
 
-        waitTimeN = 0
-        while self.isSyncPhase:  # is waiting for everyone to use the laser
-            time.sleep(0.1)
-            waitTimeN += 1
-            if waitTimeN % 100 == 0:
-                # try again
-                self.client.PushCommand(
-                    "play_take", "ClimateChange_Instruct_pl_03"
-                )  # zawira ping
-                print("Take 03 ......")  # waiting for the end of the clip
-                time.sleep(13.5575625)
+        ## waitTimeN = 0
+        ## while self.isSyncPhase:  # is waiting for everyone to use the laser
+        ##     time.sleep(0.1)
+        ##     waitTimeN += 1
+        ##     if waitTimeN % 100 == 0:
+        ##         # try again
+        ##         self.client.PushCommand(
+        ##             "play_take", "ClimateChange_Instruct_pl_03"
+        ##         )  # zawira ping
+        ##         print("Take 03 ......")  # waiting for the end of the clip
+        ##         time.sleep(13.5575625)
         self.cube_manager.set_color_all_objects(
             "#40982f"
         )  # the color of the cubes becomes green
-        self.client.PushCommand("set_laser_pointer_active", "false")
-        print("laser inactive")
-        time.sleep(2)
-        print(2, self.isSyncPhase)
+        ## self.client.PushCommand("set_laser_pointer_active", "false")
+        ## print("laser inactive")
+        ## time.sleep(2)
+        ## print(2, self.isSyncPhase)
 
         # ClimateChange_Instruct_pl_04 succeeded
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04")
-        print("Take 04 ......")
-        time.sleep(4.5191875)  # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04")
+        ## print("Take 04 ......")
+        ## time.sleep(4.5191875)  # waiting for the end of the clip
 
         # ClimateChange_Instruct_pl_05
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
-        print("Take 05 ......")
-        time.sleep(138.266125)  # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
+        ## print("Take 05 ......")
+        ## time.sleep(138.266125)  # waiting for the end of the clip
 
         # ClimateChange_Instruct_pl_06
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
-        print("Take 06 ......")
-        time.sleep(17.893895833333332)  # waiting for the end of the clip
+        ## self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
+        ## print("Take 06 ......")
+        ## time.sleep(17.893895833333332)  # waiting for the end of the clip
 
         # ClimateChange_Instruct_pl_07
         self.client.PushCommand(
@@ -625,10 +629,10 @@ class Application:
         self.client.PushCommand(
             "disable_object", "instructor"
         )  # "instruction_agent")  # instructor The_Guest ?? How to disable instruction_agent???
-        for i in range(1, 6):
-            self.client.PushCommand(
-                "show_text", f'participant{i}_score_text "p{i} Zasoby: 0" 1.0'
-            )
+        ## for i in range(1, 6):
+        ##     self.client.PushCommand(
+        ##         "show_text", f'participant{i}_score_text "p{i} Zasoby: 0" 1.0'
+        ##     )
 
         # Disabling verbal communication between players – they should not be able to hear each other once the game starts (after Audio 7).
         # set_character_audio_volume {character_id} {target_volume} {fade_in_time}
@@ -646,14 +650,15 @@ class Application:
         self.client.PushCommand("set_laser_pointer_active", "true")
         print("laser active")
         time.sleep(
-            1
+            5
         )  # artificially added delay, because it is not known why, the laser does not immediately turn on. Maybe because of PushCommand
         self.gameStarted = True
+        EnviCondition_start = 1
 
         for ri in range(self.NR):  # number of rounds: 8
             self.client.PushCommand("fade_in", "1.0")
             self.client.PushCommand("show_text", f'global_message "Runda {ri + 1}" 1.0')
-
+            
             with open(DATA / f"{file_name}_round_{ri}.jsonl", "w") as file:
                 while self.i < self.T:  # Duration of a game round: 30s
                     self.H = np.zeros(self.game.n_agents)
@@ -705,7 +710,7 @@ class Application:
             print("laser inactive")
             # sygnal poczatku przerwy
             self.client.SendGenericCommand(
-                "play_audio_clip", "friend_request.ogg source 0.1 0.0 false"
+                "play_audio_clip", "signal.opus source 0.5 0.0 false"
             )
             self.client.PushCommand("show_text", 'global_message "Przerwa" 1.0')
             # wyszarzenie wszyskich kostek na czas przerwy
@@ -739,67 +744,78 @@ class Application:
                 x_M = False
                 x_BM = not x_M  ## noqa
 
-            # 3. Podział bogactwa:
-            if self.game.n_agents > 1:
-                for i in range(self.game.n_agents - 1):
-                    if (
-                        self.playersWealthDistribution[i]
-                        != self.playersWealthDistribution[i + 1]
-                    ):
-                        break
-                x_SN = (
-                    self.playersWealthDistribution[i]
-                    != self.playersWealthDistribution[i + 1]
-                )
+            min_wealth = abs(min(wealth_dct.value()))
+            max_wealth = abs(max(wealth_dct.values()))
+
+            if max_wealth - min_wealth < 4:
+                equal_wealth = True
             else:
-                x_SN = False
-            x_SP = not x_SN
+                equal_wealth = False
 
             ###### interwencje GuestXR ######
             #################################
 
-            if (
-                0.7 < EnviCondition and "Audio_3_EP_pl" in intervention_set
-            ):  # Pierwsza interwencja zafiksowana na pierwsza przerwe
-                intervention = "Audio_3_EN"
-                intervention_set -= {intervention}
-                intervention_EP -= {intervention}
-            elif x_M and "Audio_4_EN_pl" in intervention_set:
-                intervention = "Audio_4_EN_pl"
-                intervention_set -= {intervention}
-                intervention_EN -= {intervention}
-            elif x_EP and len(intervention_EP) > 0:
-                intervention = random.choice(list(intervention_EP))
-                intervention_set -= {intervention}
-                intervention_EP -= {intervention}
-            elif x_EN and len(intervention_EN) > 0:
-                intervention = random.choice(list(intervention_EN))
-                intervention_set -= {intervention}
-                intervention_EN -= {intervention}
-            elif x_EP and len(intervention_TPP) > 0:
-                intervention = random.choice(list(intervention_TPP))
-                intervention_set -= {intervention}
-                intervention_TPP -= {intervention}
-            elif x_EN and len(intervention_TPN) > 0:
-                intervention = random.choice(list(intervention_TPN))
-                intervention_set -= {intervention}
-                intervention_TPN -= {intervention}
-            elif x_SN and len(intervention_SN) > 0:
-                intervention = random.choice(list(intervention_SN))
-                intervention_set -= {intervention}
-                intervention_SN -= {intervention}
-            elif x_SP and len(intervention_SP) > 0:
-                intervention = random.choice(list(intervention_SP))
-                intervention_set -= {intervention}
-                intervention_SP -= {intervention}
+            if ri == 3:
+                intervention = ""
+                if EnviCondition > .5:
+                    intervention = "Audio_7_TPP_pl"
+                    
+                else:
+                    intervention = "Audio_7_TPN_pl"
+                    
+            elif ri == 1:
+                intervention = ""
+                if EnviCondition > .5:
+                    intervention = "Audio_6_TPP_pl"
+                    
+                else:
+                    intervention = "Audio_6_TPN_pl"
+                         
+            elif ri == 2:
+                intervention = ""
+                if EnviCondition > .5:
+                    intervention = "Audio_6_TPP_pl"
+                    
+                elif EnviCondition < .3:
+                    intervention = "Audio_6_TPN_pl"
+                    
+                else:
+                    intervention = ""
+            elif ri == 0:
+                intervention = ""
+                if equal_wealth:
+                    intervention = "Audio_12_SP_pl"
+                else:
+                    intervention = "Audio_12_SN_pl"
+            elif ri == 4:
+                intervention = ""
+                if EnviCondition_start - EnviCondition > .2:
+                    intervention = "Audio_1_EN_pl"
+                elif EnviCondition - EnviCondition_start > .2 and EnviCondition > .3:
+                    intervention = "Audio_1_EP_pl"
+            elif ri == 5:
+                intervention = ""
+                if EnviCondition > .4:
+                    intervention = "Audio_3_EP_pl"
+                else:
+                    intervention = "Audio_3_EN_pl"
+
+            elif ri == 6:
+                intervention = ""
+                if equal_wealth:
+                    intervention = "Audio_9_SP_pl"
+                else:
+                    intervention = "Audio_9_SN_pl"
             else:
                 intervention = ""
+            
             # wykonanie wybranej interwencji glosowej
             if intervention != "":
                 print(f"play_audio_clip :: {intervention}.opus")
                 self.client.PushCommand(
                     "play_audio_clip", f"{intervention}.opus ambientNoise 1.0 1.0 false"
                 )
+            time.sleep(9)
 
             # Zmiana kolory drzewa na czerwone
             if EnviCondition < 0.5:
@@ -839,7 +855,7 @@ class Application:
                 self.client.PushCommand("disable_object", "ParticleSystem")
 
             time.sleep(
-                10
+                3
             )  # break time part 2 - w tym czasie napewno zmieszcza sie interwnecje w tym gloswe
 
             # Aktualizcja koloru kostek
@@ -859,7 +875,7 @@ class Application:
             if ri < self.NR - 1:
                 # koniec rundy - dwieck konca i laser on
                 self.client.SendGenericCommand(
-                    "play_audio_clip", "friend_request.ogg source 1.0 0.0 false"
+                    "play_audio_clip", "signal.opus source 0.5 0.0 false"
                 )
                 time.sleep(2)  # break time part 3 - czas naz miane koloru kostek
                 self.client.PushCommand("set_laser_pointer_active", "true")
@@ -867,6 +883,7 @@ class Application:
                 time.sleep(1)  # break time part 4 - czas na aktywacje lasera
             else:  # jak ostatnia runda to nie ma dzieku konca przerwy i nie wlacza sie laser
                 time.sleep(2)  # break time part 3 - czas naz miane koloru kostek
+            EnviCondition_start = EnviCondition
 
         # koniec gry #############################################################
 
@@ -894,3 +911,5 @@ def main() -> None:
 # %%
 if __name__ in "__main__":
     main()
+
+# %%
