@@ -26,7 +26,7 @@ if not os.path.exists(DATA):
 ## Define globals
 n_obververs = 0  ## number of additional non playing observers
 n_players = 1  ## number of players plaing the game - not observersa
-nr_rounds = 8  ## Number of rounds
+nr_rounds = 3  ## Number of rounds
 H_Rate_One_Shot = 0.1 / n_players  ## How much the single shot takes of the resource
 file_name = datetime.datetime.now().strftime(
     "%Y_%m_%d_%H_%M"
@@ -34,7 +34,7 @@ file_name = datetime.datetime.now().strftime(
 
 ## Sex of the users
 sex_users = {
-    "guestxr.oculusc@gmail.com": "man",
+    "guestxr.oculusc@gmail.com": "woman",
     "weronika.m.lewandowska@gmail.com": "woman",
     "guestxr.oculusd@gmail.com": "woman",
     "guestxroculusa@gmail.com": "woman",
@@ -513,7 +513,7 @@ class Application:
                 "fade_out",
                 f"0.3 'Please wait.\
                                     \nThe game is about to start.\
-                                    \nWaiting for {self.game.n_agents - self.client.GetPlayersList().Count + 1} players to join.'",
+                                    \nWaiting for {self.game.n_agents - self.client.GetPlayersList().Count + 1} player(s) to join.'",
             )
             print(".", end="", flush=True)
             time.sleep(2)
@@ -523,6 +523,9 @@ class Application:
         )
         self.print_player_list()
         time.sleep(5)
+        print(self.UserIdToPlayerIndex)
+        print(self.NickNameToPlayerIndex)
+        print(self.PlayerIndexToPlayerNr)
 
         # synchronization of the start time from Bernhard
         self.customEventTime = datetime.datetime.now
@@ -595,6 +598,7 @@ class Application:
         # Play instruciotn sound - is now part of the recording
         # sound of the round, then everyone has to press the laser. And all the cubes will be activated.
         self.client.PushCommand("set_laser_pointer_active", "true")
+        time.sleep(1)
 
         waitTimeN = 0
         while self.isSyncPhase:  # is waiting for everyone to use the laser
@@ -651,6 +655,8 @@ class Application:
         for userID in self.UserIdToPlayerIndex.keys():
             self.client.PushCommand("set_character_audio_volume", f"{userID} 0.0 0.5")
 
+        time.sleep(1)
+
         # Duration of game round: 30s
         # Pause in the game: 15s
         # Number of rounds: 8
@@ -662,16 +668,19 @@ class Application:
         self.client.PushCommand("set_laser_pointer_active", "true")
         print("laser active")
         time.sleep(
-            0
+            1
         )  # artificially added delay, because it is not known why, the laser does not immediately turn on. Maybe because of PushCommand
+        self.client.PushCommand("show_text", 'global_message "Runda 1" 1.0')
+        time.sleep(1)
         self.gameStarted = True
         EnviCondition_start = 1
 
         for ri in range(self.NR):  # number of rounds: 8
             self.client.PushCommand("fade_in", "1.0")
-            self.client.PushCommand("show_text", f'global_message "Runda {ri + 1}" 1.0')
-            if ri == 0:
-                time.sleep(4)
+            if ri != 0:
+                self.client.PushCommand(
+                    "show_text", f'global_message "Runda {ri + 1}" 1.0'
+                )
 
             with open(DATA / f"{file_name}_round_{ri}.jsonl", "w") as file:
                 while self.i < self.T:  # Duration of a game round: 30s
@@ -712,6 +721,9 @@ class Application:
                         "aQ": len(self.cube_manager.avaliable_cubes),
                         "Enviornment Condition": envE / envK,
                         **self._wealth_dct,
+                        **self.UserIdToPlayerIndex,
+                        **self.NickNameToPlayerIndex,
+                        **self.PlayerIndexToPlayerNr,
                     }
                     file.write(json.dumps(tmp) + "\n")
 
@@ -898,5 +910,3 @@ def main() -> None:
 # %%
 if __name__ in "__main__":
     main()
-
-# %%
