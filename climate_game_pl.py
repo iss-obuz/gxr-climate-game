@@ -34,11 +34,11 @@ file_name = datetime.datetime.now().strftime(
 
 ## Sex of the users
 sex_users = {
-    "guestxr.oculusc@gmail.com": "man",
-    "weronika.m.lewandowska@gmail.com": "woman",
-    "guestxr.oculusd@gmail.com": "man_rich",
-    "guestxroculusa@gmail.com": "woman",
-    "guestxrgogleb@gmail.com": "man_poor",
+    "guestxr.oculusc@gmail.com": "woman",
+    "weronika.m.lewandowska@gmail.com": "woman_rich",
+    "guestxr.oculusd@gmail.com": "man",
+    "guestxroculusa@gmail.com": "woman_rich",
+    "guestxrgogleb@gmail.com": "woman_rich",
 }
 
 ## Emails to sits (locations around the table.
@@ -762,7 +762,7 @@ class Application:
                 else:
                     intervention = "Audio_7_TPN_pl"
 
-            elif ri == 4:
+            elif ri == 1:
                 intervention = ""
                 if EnviCondition > 0.5:
                     intervention = "Audio_6_TPP_pl"
@@ -786,7 +786,7 @@ class Application:
                     intervention = "Audio_12_SP_pl"
                 else:
                     intervention = "Audio_12_SN_pl"
-            elif ri == 1:
+            elif ri == 4:
                 intervention = ""
 
                 ## if EnviCondition > 0.5:
