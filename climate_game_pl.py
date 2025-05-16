@@ -721,9 +721,9 @@ class Application:
                         "aQ": len(self.cube_manager.avaliable_cubes),
                         "Enviornment Condition": envE / envK,
                         **self._wealth_dct,
-                        **self.UserIdToPlayerIndex,
-                        **self.NickNameToPlayerIndex,
-                        **self.PlayerIndexToPlayerNr,
+                        "UserIdToPlayerIndex": self.UserIdToPlayerIndex,
+                        "NickNameToPlayerIndex": self.NickNameToPlayerIndex,
+                        "PlayerIndexToPlayerNr": self.PlayerIndexToPlayerNr,
                     }
                     file.write(json.dumps(tmp) + "\n")
 
@@ -762,7 +762,7 @@ class Application:
                 else:
                     intervention = "Audio_7_TPN_pl"
 
-            elif ri == 1:
+            elif ri == 4:
                 intervention = ""
                 if EnviCondition > 0.5:
                     intervention = "Audio_6_TPP_pl"
@@ -786,14 +786,17 @@ class Application:
                     intervention = "Audio_12_SP_pl"
                 else:
                     intervention = "Audio_12_SN_pl"
-            elif ri == 4:
+            elif ri == 1:
                 intervention = ""
-                if EnviCondition > 0.5:
-                    intervention = "Audio_1_EP_pl"
 
-                elif EnviCondition < 0.3:
+                ## if EnviCondition > 0.5:
+                ##    intervention = "Audio_1_EP_pl"
+                ## elif EnviCondition < 0.3:
+                ##     intervention = "Audio_1_EN_pl"
+                if EnviCondition_start - EnviCondition > 0.2:
                     intervention = "Audio_1_EN_pl"
-
+                elif EnviCondition - EnviCondition_start > 0.2 and EnviCondition > 0.3:
+                    intervention = "Audio_1_EP_pl"
                 else:
                     intervention = ""
             elif ri == 5:
