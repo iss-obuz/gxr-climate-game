@@ -25,8 +25,8 @@ if not os.path.exists(DATA):
 # %%
 ## Define globals
 n_obververs = 0  ## number of additional non playing observers
-n_players = 1  ## number of players plaing the game - not observersa
-nr_rounds = 3  ## Number of rounds
+n_players = 3  ## number of players plaing the game - not observersa
+nr_rounds = 8  ## Number of rounds
 H_Rate_One_Shot = 0.1 / n_players  ## How much the single shot takes of the resource
 file_name = datetime.datetime.now().strftime(
     "%Y_%m_%d_%H_%M"
@@ -34,11 +34,11 @@ file_name = datetime.datetime.now().strftime(
 
 ## Sex of the users
 sex_users = {
-    "guestxr.oculusc@gmail.com": "woman",
+    "guestxr.oculusc@gmail.com": "man",
     "weronika.m.lewandowska@gmail.com": "woman",
-    "guestxr.oculusd@gmail.com": "woman",
+    "guestxr.oculusd@gmail.com": "man_rich",
     "guestxroculusa@gmail.com": "woman",
-    "guestxrgogleb@gmail.com": "woman",
+    "guestxrgogleb@gmail.com": "man_poor",
 }
 
 ## Emails to sits (locations around the table.
@@ -46,7 +46,7 @@ NickNameToPlayerNR = {  # this number indicates to which position the user has b
     "guestxr.oculusc@gmail.com": 2,  # Gogle C
     "guestxr.oculusd@gmail.com": 5,  # Gogle D
     "guestxroculusa@gmail.com": 1,  # Gogle A
-    "guestxrgogleb@gmail.com": 4,  # Gogle B
+    "guestxrgogleb@gmail.com": 3,  # Gogle B
     "guestxruw@gmail.com": 5,  # participant5   oculus B p2
     "guestxr2@gmail.com": 3,  # participant3   oculus A
     "andrzejn232@gmail.com": 2,  # participant2
@@ -782,16 +782,20 @@ class Application:
                     intervention = ""
             elif ri == 3:
                 intervention = ""
-                if self._equal_wealth:
+                if self._eqaul_wealth:
                     intervention = "Audio_12_SP_pl"
                 else:
                     intervention = "Audio_12_SN_pl"
             elif ri == 4:
                 intervention = ""
-                if EnviCondition_start - EnviCondition > 0.2:
-                    intervention = "Audio_1_EN_pl"
-                elif EnviCondition - EnviCondition_start > 0.2 and EnviCondition > 0.3:
+                if EnviCondition > 0.5:
                     intervention = "Audio_1_EP_pl"
+
+                elif EnviCondition < 0.3:
+                    intervention = "Audio_1_EN_pl"
+
+                else:
+                    intervention = ""
             elif ri == 5:
                 intervention = ""
                 if EnviCondition > 0.4:
@@ -801,7 +805,7 @@ class Application:
 
             elif ri == 6:
                 intervention = ""
-                if self._equal_wealth:
+                if self._eqaul_wealth:
                     intervention = "Audio_9_SP_pl"
                 else:
                     intervention = "Audio_9_SN_pl"
@@ -882,7 +886,7 @@ class Application:
                 time.sleep(1)  # break time part 4 - czas na aktywacje lasera
             else:  # jak ostatnia runda to nie ma dzieku konca przerwy i nie wlacza sie laser
                 time.sleep(2)  # break time part 3 - czas naz miane koloru kostek
-            EnviCondition_start = EnviCondition
+            EnviCondition_start = EnviCondition  ## noqa
 
         # koniec gry #############################################################
 
