@@ -6,7 +6,7 @@ This repo is for the Python Client of the Climate Game. In a nutshell, it sends 
 
 * .NET ([.NET](https://dotnet.microsoft.com/en-us/download); tested on v 7.0)
 * _python3.12_ ([anaconda distribution](https://www.anaconda.com/products/distribution) is preferred)
-* other _python_ dependencies are specified in `requirements.yaml`
+* other _python_ dependencies are specified in `environment.yaml`
 
 ## Setup
 
