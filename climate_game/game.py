@@ -1,81 +1,9 @@
-# %%
-## Import modules
-import numpy as np
-from gxr.envir import EnvirGame
-import json
-from pathlib import Path
-import os
-import datetime
-import random
-from collections import deque
 import time
-import pythonnet
+import numpy as np
+import datetime
+from climate_game import DATA
+import json
 
-pythonnet.load("coreclr")
-from enum import Enum, auto  ## noqa
-from System import EventHandler  ## noqa
-from KiinClient import Guest  ## noqa
-
-# %%
-## Define paths
-ROOT = Path(__file__).absolute().parent
-DATA = ROOT / "data"
-if not os.path.exists(DATA):
-    os.makedirs(DATA)
-# %%
-## Define globals
-n_obververs = 0  ## number of additional non playing observers
-n_players = 3  ## number of players plaing the game - not observersa
-nr_rounds = 8  ## Number of rounds
-H_Rate_One_Shot = 0.1 / n_players  ## How much the single shot takes of the resource
-file_name = datetime.datetime.now().strftime(
-    "%Y_%m_%d_%H_%M"
-)  ## Name of the file to write out.
-
-## Sex of the users
-sex_users = {
-    "guestxr.oculusc@gmail.com": "woman",
-    "weronika.m.lewandowska@gmail.com": "woman_rich",
-    "guestxr.oculusd@gmail.com": "man",
-    "guestxroculusa@gmail.com": "woman_rich",
-    "guestxrgogleb@gmail.com": "woman_rich",
-}
-
-## Emails to sits (locations around the table.
-NickNameToPlayerNR = {  # this number indicates to which position the user has been assigned
-    "guestxr.oculusc@gmail.com": 2,  # Gogle C
-    "guestxr.oculusd@gmail.com": 5,  # Gogle D
-    "guestxroculusa@gmail.com": 1,  # Gogle A
-    "guestxrgogleb@gmail.com": 3,  # Gogle B
-    "guestxruw@gmail.com": 5,  # participant5   oculus B p2
-    "guestxr2@gmail.com": 3,  # participant3   oculus A
-    "andrzejn232@gmail.com": 2,  # participant2
-    "weronika.m.lewandowska@gmail.com": 4,  # participant4   Weronika oculus private p3 a wyplata na p5
-    "manuelzurera@virtualbodyworks.com": 1,
-    "bernhard@kiin.tech": 5,
-    "elena@kiin.tech": 4,
-}
-
-# %%
-## Non-configurable globals.
-###### interwencje GuestXR ######
-#################################
-
-intervention_EP = {"Audio_3_EP_pl", "Audio_4_EP_pl", "Audio_1_EP_pl"}
-intervention_EN = {"Audio_1_EN_pl", "Audio_3_EN_pl", "Audio_4_EN_pl"}
-intervention_TPP = {"Audio_6_TPP_pl", "Audio_7_TPP_pl"}
-intervention_TPN = {"Audio_6_TPN_pl", "Audio_7_TPN_pl"}
-intervention_SN = {"Audio_9_SN_pl", "Audio_12_SN_pl"}
-intervention_SP = {"Audio_9_SP_pl", "Audio_12_SP_pl"}
-
-intervention_set = (
-    intervention_EN
-    | intervention_EP
-    | intervention_TPP
-    | intervention_TPN
-    | intervention_SN
-    | intervention_SP
-)
 
 wealth_objects = [
     "commons_one_coin",
@@ -89,134 +17,57 @@ wealth_objects = [
 ]
 
 
-# %%
-## Define classes and functions
-class LiveEventType(Enum):
-    ButtonPress = 0
-    VoiceActivity = auto()
-    LookAtParticipant = auto()
-
-
-class CubeManager:
-    """A class that manages the behaviors of cubes."""
-
-    def __init__(self, client):
-        self.client = client
-        self.size = 5  # The size of the grid
-        self.removed_cubes = deque([])
-        self.avaliable_cubes = []
-        self.cubeScale = {}
-
-    def _get_anchor_name(self, x, y, z):
-        return f"commons_resource_anchor{x}{y}{z}"
-
-    def _get_object_name(self, x, y, z):
-        return f"commons_resource{x}{y}{z}"
-
-    def disable_object(self, x, y, z):
-        self.client.PushCommand("disable_object", self._get_object_name(x, y, z))
-
-    def spawn_all_objects(self):
-        for x in range(1, self.size + 1):
-            for y in range(1, self.size + 1):
-                for z in range(1, self.size + 1):
-                    self.spawn_object(x, y, z)
-
-    def scale_all_objects(self):
-        d = self.cubeScale.copy()
-        for k, v in d.items():
-            if k not in self.removed_cubes and v < 0.1:
-                self.client.PushCommand("set_object_scale", f"{k} {v},{v},{v} 0.1")
-
-    def set_color_all_objects(self, color):
-        for x in range(1, self.size + 1):
-            for y in range(1, self.size + 1):
-                for z in range(1, self.size + 1):
-                    self.set_object_color(x, y, z, color, "0.1")
-
-    def spawn_object(self, x, y, z):
-        anchor_name = self._get_anchor_name(x, y, z)
-        object_name = self._get_object_name(x, y, z)
-        self.client.PushCommand(
-            "spawn_object", f"commons_resource {object_name} {anchor_name}"
-        )
-        self.client.PushCommand("enable_object", object_name)
-        self.client.PushCommand("set_object_color", f"{object_name} #777777 0.0")
-        self.avaliable_cubes.append(object_name)
-
-    def set_object_color(self, x, y, z, color, transition_time=2.0):
-        object_name = self._get_object_name(x, y, z)
-        self.client.PushCommand(
-            "set_object_color", f"{object_name} {color} {transition_time}"
-        )
-
-    def create_wave_pattern(self, color, wave_interval=0.1, transition_time=2.0):
-        for i in range(1, self.size * 2):  # Creating a wave that moves through the grid
-            for x in range(1, self.size + 1):
-                for y in range(1, self.size + 1):
-                    for z in range(1, self.size + 1):
-                        if x + y + z == i:
-                            self.set_object_color(x, y, z, color, transition_time)
-            time.sleep(wave_interval)
-
-    def random_flash_pattern(self, flash_count=10, transition_time=0.5):
-        for _ in range(flash_count):
-            x = random.randint(1, self.size)
-            y = random.randint(1, self.size)
-            z = random.randint(1, self.size)
-            # Generates a shade of blue, transitioning to white
-            shade = random.randint(0, 255)
-            color = f"#{shade:02X}{shade:02X}FF"
-            self.set_object_color(x, y, z, color, transition_time)
-
-    def disable_all_objects(self):
-        for x in range(1, self.size + 1):
-            for y in range(1, self.size + 1):
-                for z in range(1, self.size + 1):
-                    self.disable_object(x, y, z)
-
-    def sync_with_Et(self, Et, EK):
-        d = self.cubeScale.copy()
-        # to remove from smalest to higest
-        for k, v in sorted(d.items(), key=lambda x: x[1]):
-            if (
-                Et < EK - len(self.removed_cubes)
-                and v < 0.1
-                and k not in self.removed_cubes
-            ):  #
-                self.client.PushCommand("disable_object", k)
-                self.removed_cubes.append(k)
-                self.avaliable_cubes.remove(k)
-            else:
-                # When regenerating the environment, it can also be so that more than one cube is renewed at once
-                while Et > EK - len(self.removed_cubes) and len(self.removed_cubes) > 0:
-                    q = self.removed_cubes.popleft()
-                    self.avaliable_cubes.append(q)
-                    scl = 0.1
-                    self.cubeScale[q] = scl
-                    self.client.PushCommand("enable_object", q)
-                    self.client.PushCommand(
-                        "set_object_scale", f"{q} {scl},{scl},{scl} 0.1"
-                    )
-        # Note that any shot can exhaust more than one cube, so if you run out of hits, then randomly take the missed ones as well
-        while Et < EK - len(self.removed_cubes):
-            rand_k = random.choice(self.avaliable_cubes)
-            self.client.PushCommand("disable_object", rand_k)
-            self.removed_cubes.append(rand_k)
-            self.avaliable_cubes.remove(rand_k)
-
-
-class Application:
+class Game:
     """Class that manages the whole game."""
 
-    def __init__(self, config_SpaceRoom):
-        self.client = Guest()
+    def __init__(
+        self,
+        client,
+        config_SpaceRoom: dict,
+        event,
+        cube,
+        envir_game,
+        n_players: int,
+        n_rounds: int,
+        nick_to_player_id: dict,
+        wealth_objects: dict = wealth_objects,
+        h_rate: float = 0.1,
+        n_observers: int = 0,
+    ):
+        """Initilizes the game.
+
+        Parameters
+        ----------
+        client : _type_
+            the instance of Kiin client.
+        config_SpaceRoom : dict
+
+        event : _type_
+            _description_
+        cube : _type_
+            _description_
+        envir_game : _type_
+            _description_
+        n_players : int
+            _description_
+        n_rounds : int
+            _description_
+        nick_to_player_id : dict
+            _description_
+        wealth_objects : dict, optional
+            _description_, by default wealth_objects
+        h_rate : float, optional
+            _description_, by default .1
+        n_observers : int, optional
+            _description_, by default 0
+        """
+        self.client = client
         self.config_SpaceRoom = config_SpaceRoom
         time.sleep(2)
         print("adding event handler")
-        self.client.liveEventCallback = EventHandler(self.handler)
+        self.client.liveEventCallback = event(self.handler)
         self.UserIdToPlayerIndex = {}
-        self.cube_manager = CubeManager(self.client)
+        self.cube_manager = cube(self.client)
         self.isSyncPhase = True
         self.playersInSync = set()
         self.resourceSize = self.cube_manager.size**3
@@ -224,12 +75,14 @@ class Application:
         self.connectedusers = {}  # to synchronize the starting moment
         self.NickNameToPlayerIndex = {}
         self.PlayerIndexToPlayerNr = {}
+        self.n_players = n_players
+        self.n_observers = n_observers
         # Initialize a game object from config dictionary
-        self.game = EnvirGame.from_config(
+        self.game = envir_game.from_config(
             n_agents=n_players, K=self.resourceSize, no_behavior=True, noise=0
         )  # T=5 # T regeneracja od 5 do 95% stan srodowiska. T najlepiej nie ruszac
         self.T = 30  # duration of one round
-        self.NR = None  # number of rounds
+        self.NR = n_rounds  # number of rounds
         self.i = 0  # number of steps so far in one round
         self.H = np.zeros(self.game.n_agents)
         # self.RLb = np.loadtxt("RL_bias.txt", delimiter=" ") # RL learned bias compensation
@@ -240,6 +93,9 @@ class Application:
         self.sex_users = {}
         self._wealth_dct = {}
         self._eqaul_wealth = True
+        self.NickNameToPlayerNR = nick_to_player_id
+        self.H_Rate_One_Shot = h_rate / n_players
+        self.wealth_objects = wealth_objects
 
     def _compute_equality(self):
         """Computes equality in wealth. And set self._equality_wealth to either True or False."""
@@ -290,7 +146,7 @@ class Application:
         self.NR = number_rounds
         print(f"The number of rounds is {self.NR}")
 
-    def set_sex(self, dct: dict = sex_users) -> None:
+    def set_sex(self, dct: dict) -> None:
         """Sets the dictionary with avatars sex.
 
         Parameters
@@ -310,11 +166,11 @@ class Application:
         user_ids_for_expected_players = []
         user_niks = []
         for player in self.client.GetPlayersList():
-            if player.NickName in NickNameToPlayerNR.keys():
+            if player.NickName in self.NickNameToPlayerNR.keys():
                 user_ids_for_expected_players.append(player.UserId)  # player_id
             if (
                 player.NickName != "The_Guest"
-                and player.NickName in NickNameToPlayerNR.keys()
+                and player.NickName in self.NickNameToPlayerNR.keys()
             ):
                 user_niks.append(player.NickName)
         self.UserIdToPlayerIndex = {
@@ -325,7 +181,7 @@ class Application:
             user_nik: index for index, user_nik in enumerate(user_niks)
         }
         self.PlayerIndexToPlayerNr = {
-            index: NickNameToPlayerNR[user_nik]
+            index: self.NickNameToPlayerNR[user_nik]
             for index, user_nik in enumerate(user_niks)
         }
 
@@ -352,13 +208,13 @@ class Application:
     def prepare_wealth(self):
         # Coins 1, 3, 5, stack on place 1, rest on 2,3,4,5
         for i in range(1, 6):
-            for obj_i, wealth_object in enumerate(wealth_objects):
+            for obj_i, wealth_object in enumerate(self.wealth_objects):
                 self.client.PushCommand(
                     "spawn_object",
                     # spawn_object commons_scooter participant3_commons_scooter resource_participant3_object1
                     f"{wealth_object} participant{i}_{wealth_object} resource_participant{i}_object{1 if obj_i < 4 else obj_i - 2}",
                 )
-            for wealth_object in wealth_objects:
+            for wealth_object in self.wealth_objects:
                 self.client.PushCommand(
                     "disable_object", f"participant{i}_{wealth_object}"
                 )
@@ -368,81 +224,81 @@ class Application:
         pUr = self.game.U[player_i]  # player Utility
         if pUr <= 5 / z:
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[0]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[0]}"
             )
             self.playersWealthDistribution[player_i] = 0  # Wealth level 0
         elif pUr > 5 / z and pUr <= 10 / z:
             self.client.PushCommand(
-                "enable_object", f"participant{player_n}_{wealth_objects[0]}"
+                "enable_object", f"participant{player_n}_{self.wealth_objects[0]}"
             )
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[1]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[1]}"
             )
             self.playersWealthDistribution[player_i] = 1  # Wealth level
         elif pUr > 10 / z and pUr <= 15 / z:
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[0]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[0]}"
             )
             self.client.PushCommand(
-                "enable_object", f"participant{player_n}_{wealth_objects[1]}"
+                "enable_object", f"participant{player_n}_{self.wealth_objects[1]}"
             )
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[2]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[2]}"
             )
             self.playersWealthDistribution[player_i] = 2  # Wealth level
         elif pUr > 15 / z and pUr <= 20 / z:
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[1]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[1]}"
             )
             self.client.PushCommand(
-                "enable_object", f"participant{player_n}_{wealth_objects[2]}"
+                "enable_object", f"participant{player_n}_{self.wealth_objects[2]}"
             )
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[3]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[3]}"
             )
             self.playersWealthDistribution[player_i] = 3  # Wealth level
         elif pUr > 20 / z and pUr <= 25 / z:
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[2]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[2]}"
             )
             self.client.PushCommand(
-                "enable_object", f"participant{player_n}_{wealth_objects[3]}"
+                "enable_object", f"participant{player_n}_{self.wealth_objects[3]}"
             )
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[4]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[4]}"
             )
             self.playersWealthDistribution[player_i] = 4  # Wealth level
         elif pUr > 25 / z and pUr <= 30 / z:
             # self.client.PushCommand("disable_object", f"participant{player_n}_{wealth_objects[3]}")
             self.client.PushCommand(
-                "enable_object", f"participant{player_n}_{wealth_objects[4]}"
+                "enable_object", f"participant{player_n}_{self.wealth_objects[4]}"
             )
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[5]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[5]}"
             )
             self.playersWealthDistribution[player_i] = 5  # Wealth level
         elif pUr > 30 / z and pUr <= 35 / z:
             # self.client.PushCommand("disable_object", f"participant{player_n}_{wealth_objects[4]}")
             self.client.PushCommand(
-                "enable_object", f"participant{player_n}_{wealth_objects[5]}"
+                "enable_object", f"participant{player_n}_{self.wealth_objects[5]}"
             )
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[6]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[6]}"
             )
             self.playersWealthDistribution[player_i] = 6  # Wealth level
         elif pUr > 35 / z and pUr <= 40 / z:
             # self.client.PushCommand("disable_object", f"participant{player_n}_{wealth_objects[5]}")
             self.client.PushCommand(
-                "enable_object", f"participant{player_n}_{wealth_objects[6]}"
+                "enable_object", f"participant{player_n}_{self.wealth_objects[6]}"
             )
             self.client.PushCommand(
-                "disable_object", f"participant{player_n}_{wealth_objects[7]}"
+                "disable_object", f"participant{player_n}_{self.wealth_objects[7]}"
             )
             self.playersWealthDistribution[player_i] = 7  # Wealth level
         elif pUr > 40 / z:
             # self.client.PushCommand("disable_object", f"participant{player_n}_{wealth_objects[6]}")
             self.client.PushCommand(
-                "enable_object", f"participant{player_n}_{wealth_objects[7]}"
+                "enable_object", f"participant{player_n}_{self.wealth_objects[7]}"
             )
             self.playersWealthDistribution[player_i] = 8  # Wealth level
 
@@ -453,24 +309,34 @@ class Application:
             print(f"custom event received, userId: {xx_x}")
             playerId = args.data["extraData"]["userId"].strip()
 
-            if playerId in NickNameToPlayerNR.keys():
+            if playerId in self.NickNameToPlayerNR.keys():
                 self.connectedusers[playerId] = datetime.datetime.now()
             else:
-                print(f"playerid:{playerId} nicktoPlayerNR:{NickNameToPlayerNR.keys()}")
+                print(
+                    f"playerid:{playerId} nicktoPlayerNR:{self.NickNameToPlayerNR.keys()}"
+                )
 
-        if args.data["type"] == LiveEventType.ButtonPress.value and self.isSyncPhase:
-            self.playersInSync.add(NickNameToPlayerNR[args.data["source_client_id"]])
-            print(NickNameToPlayerNR[args.data["source_client_id"]])
+        if (
+            args.data["type"] == self.LiveEventType.ButtonPress.value
+            and self.isSyncPhase
+        ):
+            self.playersInSync.add(
+                self.NickNameToPlayerNR[args.data["source_client_id"]]
+            )
+            print(self.NickNameToPlayerNR[args.data["source_client_id"]])
             print(f"playersInSync set: {self.playersInSync}")
             if len(self.playersInSync) >= self.game.n_agents:
                 self.isSyncPhase = False
 
-        elif args.data["type"] == LiveEventType.ButtonPress.value and self.gameStarted:
+        elif (
+            args.data["type"] == self.LiveEventType.ButtonPress.value
+            and self.gameStarted
+        ):
             cube_id = args.data["extraData"]["pressable_object"]
             player_i = self.NickNameToPlayerIndex[args.data["source_client_id"]]
 
             # value added here and sleep in the game loop determine harvesting rate
-            self.H[player_i] += H_Rate_One_Shot
+            self.H[player_i] += self.H_Rate_One_Shot
 
             # scaling down the cube after each shot
             if cube_id in self.cube_manager.cubeScale:
@@ -490,14 +356,6 @@ class Application:
             )
 
     def connect(self):
-        global intervention_set
-        global \
-            intervention_EN, \
-            intervention_EP, \
-            intervention_SN, \
-            intervention_SP, \
-            intervention_TPN, \
-            intervention_TPP
         self.client.StartClient(self.config_SpaceRoom["appId"], "1_2.40")
         time.sleep(5)
         self.client.JoinRoom(self.config_SpaceRoom["theRoomName"], 5)
@@ -507,7 +365,8 @@ class Application:
         )
         # make this + 1 +2 if you want an obverver or +3 for 2 observers etc
         while (
-            self.client.GetPlayersList().Count < self.game.n_agents + 1 + n_obververs
+            self.client.GetPlayersList().Count
+            < self.game.n_agents + 1 + self.n_observers
         ):  # +1 because GuestXR is counted (although it is a meta pleyer)
             self.client.PushCommand(
                 "fade_out",
@@ -577,6 +436,7 @@ class Application:
             "play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true"
         )
 
+    def play(self, file_name):
         # The instructor starts giving instructions about 12 seconds after everyone in the room appears
         for i in range(1, 6):
             self.client.PushCommand(
@@ -900,20 +760,3 @@ class Application:
         )  # waiting for the end of the clip
         print("Take 08 ......")
         time.sleep(16.404916666666665)
-
-
-def main() -> None:
-    config = None
-    with open("SpaceRoom.json", "r") as file:
-        config = json.load(file)
-
-    app = Application(config)
-    app.set_number_rounds(number_rounds=nr_rounds)
-    app.set_sex(dct=sex_users)
-    print("test_app")
-    app.connect()
-
-
-# %%
-if __name__ in "__main__":
-    main()

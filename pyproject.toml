@@ -1,0 +1,62 @@
+[project]
+name = "cliamte_game"
+description = "Python client to run and test climate game from the GuestXR project."
+version = "0.1"
+
+[tool.mypy]
+strict = true
+exclude = ["tests"]
+warn_unreachable = true
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+ignore_missing_imports = true
+plugins = "numpy.typing.mypy_plugin"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "--verbose",
+    "--tb=no",
+    "--capture=no",
+    "--pdbcls=IPython.terminal.debugger:Pdb",
+    "--import-mode=importlib",
+    "--doctest-modules"
+]
+testpaths = ["tests", "climate_game"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+branch = true
+source = ["climate_game", "tests"]
+command_line = "-m pytest"
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+    ]
+ignore_errors = true
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["climate_game", "climate_game.*"]
