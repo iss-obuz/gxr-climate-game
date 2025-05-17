@@ -20,8 +20,12 @@ class Game:
         n_rounds: int,
         nick_to_player_id: dict,
         wealth_objects: dict,
+        cubes_color: dict,
         h_rate: float = 0.1,
         n_observers: int = 0,
+        tree: float = 0.5,
+        world: float = 0.5,
+        fog: float = 0.3,
     ):
         """Initilizes the game.
 
@@ -63,6 +67,17 @@ class Game:
             a float defining how much should one shot take from the resource. It is divided by the number of players, by default .1
         n_observers : int, optional
             the number of additional non-playing characters, by default 0
+        tree : float, optional
+            the EnviCondtion's value below which the tree should turn red.
+        world : float, optional
+            the EnviCondtion's value below which the outside world should turn red.
+        fog : float, optional
+            the EnviCondtion's value below which the red fog should be activated.
+        cubes_color : dict
+            the dictionary where keys are values of the EnviCondition above which the color of the cubes should change. The keys are hex colors. For example.
+            {
+                "#40982f" : .5
+            }
         """
         self.client = client
         self.config_SpaceRoom = config_SpaceRoom
@@ -99,12 +114,26 @@ class Game:
         self._eqaul_wealth = True
         self.NickNameToPlayerNR = nick_to_player_id
         self.H_Rate_One_Shot = h_rate / n_players
-        self.wealth_objects = (wealth_objects,)
+        self.wealth_objects = wealth_objects
         self._wealth_objects_lst = [
-            item["enable"] for item in self.wealth_objects.values()
+            item["enable"] for item in self.wealth_objects.values() if "enable" in item
         ]
         self.EnviCondition, self.EnviCondition_start = 1, 1
         self.intervention = ""
+        self.tree = tree
+        self.world = world
+        self.fog = fog
+        self.cubes_color = cubes_color
+
+    def set_equal_wealth(self, value: bool):
+        """Sets the value of self._equal_wealth
+
+        Parameters:
+        -----------
+        value : bool
+            a value which should be set to self._equal_wealth
+        """
+        self._eqaul_wealth = value
 
     def _compute_equality(self):
         """Computes equality in wealth. And set self._equality_wealth to either True or False."""
@@ -112,9 +141,9 @@ class Game:
         max_wealth = abs(max(self._wealth_dct.values()))
 
         if max_wealth - min_wealth < 4:
-            self._eqaul_wealth = True
+            self.set_equalt_wealth(True)
         else:
-            self._eqaul_wealth = False
+            self.set_eqaul_wealth(False)
 
     def _set_avatars(self) -> None:
         """Sets the sex of avatars.
@@ -301,6 +330,7 @@ class Game:
             )
 
     def connect(self):
+        """Connect to the Kiin environment, set everything up and let the players in."""
         ## Send config to Kiin
         self.client.StartClient(self.config_SpaceRoom["appId"], "1_2.40")
         time.sleep(5)
@@ -387,6 +417,7 @@ class Game:
         )
 
     def instructions(self):
+        """Play the initial instructions."""
         ## Change the string on the players display.
         for i in range(1, 6):
             self.client.PushCommand(
@@ -457,7 +488,16 @@ class Game:
         # Disable Instructor.
         self.client.PushCommand("disable_object", "instructor")
 
-    def play_round(self, file_name, ri):
+    def play_round(self, file_name: str, ri: int):
+        """Play a single round of the game.
+
+        Parameters
+        ----------
+        file_name : int
+            the name of the file to which the results will be saved.
+        ri : _type_
+            the number of the round.
+        """
         with open(DATA / f"{file_name}_round_{ri}.jsonl", "w") as file:
             while self.i < self.T:  # Duration of a game round: 30s
                 self.H = np.zeros(self.game.n_agents)
@@ -503,7 +543,14 @@ class Game:
                 }
                 file.write(json.dumps(tmp) + "\n")
 
-    def interventions(self, ri):
+    def interventions(self, ri: int):
+        """Selects the intervention to be played.
+
+        Parameters
+        ----------
+        ri : int
+            the number of the round
+        """
         self.intervnetion = ""
         if ri == 0:
             if self.EnviCondition > 0.5:
@@ -553,7 +600,93 @@ class Game:
             else:
                 self.intervention = "Audio_9_SN_pl"
 
-    def play(self, file_name):
+    def play_intervention(self):
+        """Plays the intervention audio and prints its name to the screen."""
+        if self.intervention:
+            print(f"play_audio clip:: {self.intervention}.opus")
+            self.client.PushCommand(
+                "play_audio_clip",
+                f"{self.intervention}.opus ambientNoise 1.0 1.0 false",
+            )
+        else:
+            print("No intervention")
+
+    def set_tree(self, value: float = 0.5):
+        """Set the value of self.tree.
+
+        Parameters
+        ----------
+        value : float, optional
+            the EvniCondition value below which tree turns red, by default .5
+        """
+        self.tree = value
+
+    def change_tree(self):
+        """Changes the color of the tree."""
+        if self.EnviCondition < self.tree:
+            self.client.PushCommand("set_object_color", "---tree-- #FF0011 2.0")
+        else:
+            self.client.PushCommand("set_object_color", "---tree-- #FFFFFF 2.0")
+
+    def set_world(self, value: float = 0.5):
+        """Set the value of self.world.
+
+        Parameters
+        ----------
+        value : float, optional
+            the EvniCondition value below which the outside world turns red, by default .5
+        """
+        self.world = value
+
+    def change_world(self):
+        """Changes the color of the outside world."""
+        if self.EnviCondition < self.world:
+            self.client.PushCommand("fade_skybox_tint", "#FF0011 5")
+        else:
+            self.client.PushCommand("fade_skybox_tint", "#FFFFFF 5")
+            self.client.PushCommand(
+                "play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true"
+            )
+
+    def set_fog(self, value: float = 0.3):
+        """Set the value of self.fog.
+
+        Parameters
+        ----------
+        value : float, optional
+            the EvniCondition value below which the red fog is activate, by default .3
+        """
+        self.fog = value
+
+    def activate_fog(self):
+        """Activates the red fog."""
+        if self.EnviCondition <= self.fog:
+            self.backFromHell = True
+            self.client.PushCommand("enable_object", "ParticleSystem")
+            self.client.PushCommand("fade_fog_color", "red 0.5")
+            self.client.PushCommand("fade_fog_intensity", "0.5 0.5")
+            self.client.PushCommand(
+                "play_audio_clip",
+                "Sound_5_Industrial.opus ambientNoise 0.2 1.0 true",
+            )
+        elif self.backFromHell:
+            self.backFromHell = False
+            self.client.PushCommand("disable_object", "ParticleSystem")
+
+    def color_cubes(self):
+        """Colors the cubes depending on the environment state."""
+        for key, value in self.cubes_color.items():
+            if value < self.EnviCondition:
+                self.cube_manager.set_color_all_objects(key)
+
+    def play(self, file_name: str):
+        """Play the whole game.
+
+        Parameters
+        ----------
+        file_name : str
+            the name of the file to which the results will be stored.
+        """
         ## Play Instructions
         self.instructions()
 
@@ -576,7 +709,7 @@ class Game:
         ## Start the game
         self.gameStarted = True
 
-        for ri in range(self.NR):  # number of rounds: 8
+        for ri in range(self.NR):
             self.client.PushCommand("fade_in", "1.0")
             if ri != 0:
                 self.client.PushCommand(
@@ -616,59 +749,26 @@ class Game:
             self.interventions(ri=ri)
 
             ## Play the intervention
-            if self.intervention != "":
-                print(f"play_audio_clip :: {self.intervention}.opus")
-                self.client.PushCommand(
-                    "play_audio_clip",
-                    f"{self.intervention}.opus ambientNoise 1.0 1.0 false",
-                )
+            self.play_intervention()
+
+            ## Wait till intervention to end.
             time.sleep(9)
 
-            ## Change the color of the tree to red
-            if self.EnviCondition < 0.5:
-                self.client.PushCommand("set_object_color", "---tree-- #FF0011 2.0")
-            else:
-                self.client.PushCommand("set_object_color", "---tree-- #FFFFFF 2.0")
+            ## Change the color of the tree
+            self.change_tree()
 
-            ## Change the color of the outside world to red
-            if self.EnviCondition < 0.5:
-                self.client.PushCommand("fade_skybox_tint", "#FF0011 5")
-            else:
-                self.client.PushCommand("fade_skybox_tint", "#FFFFFF 5")
-                self.client.PushCommand(
-                    "play_audio_clip", "birds.ogg ambientNoise 0.2 1.0 true"
-                )
+            ## Change the color of the outside world
+            self.change_world()
 
             ## Activate the red fog
-            if self.EnviCondition <= 0.3:
-                self.backFromHell = True
-                self.client.PushCommand("enable_object", "ParticleSystem")
-                self.client.PushCommand("fade_fog_color", "red 0.5")
-                self.client.PushCommand("fade_fog_intensity", "0.5 0.5")
-                self.client.PushCommand(
-                    "play_audio_clip",
-                    "Sound_5_Industrial.opus ambientNoise 0.2 1.0 true",
-                )
-            elif self.backFromHell:
-                self.backFromHell = False
-                self.client.PushCommand("disable_object", "ParticleSystem")
+            self.activate_fog()
 
             ## Wait for changes to take effect
             time.sleep(3)
 
             ## Change the color of the cubes.
-            if 0.5 < self.EnviCondition:
-                self.cube_manager.set_color_all_objects(
-                    "#40982f"
-                )  # the color of the cubes becomes ok [green]
-            elif 0.3 < self.EnviCondition:
-                self.cube_manager.set_color_all_objects(
-                    "#af9410"
-                )  # color of cubes becomes warning [orange]
-            else:
-                self.cube_manager.set_color_all_objects(
-                    "#af1010"
-                )  # color of cubes becomes critical [red]
+            self.color_cubes()
+
             ## Wait for the changes ot take the effect
             time.sleep(2)
 
