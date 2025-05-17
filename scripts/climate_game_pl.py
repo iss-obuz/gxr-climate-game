@@ -45,6 +45,20 @@ NickNameToPlayerNR = {  # this number indicates to which position the user has b
     "elena@kiin.tech": 4,
 }
 
+wealth_objects = {
+    (0, 2): {"disable": "commons_one_coin"},
+    (2, 4): {"enable": "commons_one_coin", "disable": "commons_three_coins"},
+    (4, 6): {"enable": "commons_three_coins", "disable": "commons_five_coins"},
+    (6, 8): {"enable": "commons_five_coins", "disable": "commons_pile"},
+    (8, 10): {"enable": "commons_pile", "disable": "commons_bike"},
+    (10, 12): {"enable": "commons_bike", "disable": "commons_scooter"},
+    (12, 14): {"enable": "commons_scooter", "disable": "commons_car"},
+    (14, 16): {"enable": "commons_car", "disable": "commons_house"},
+    (16, 18): {
+        "enable": "commons_house",
+    },
+}
+
 
 # %%
 def main() -> None:
@@ -62,6 +76,7 @@ def main() -> None:
         n_rounds=8,
         nick_to_player_id=NickNameToPlayerNR,
         h_rate=H_Rate_One_Shot,
+        wealth_objects=wealth_objects,
     )
     game.set_number_rounds(number_rounds=nr_rounds)
     game.set_sex(dct=sex_users)
