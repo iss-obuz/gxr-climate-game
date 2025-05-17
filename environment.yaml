@@ -1,4 +1,4 @@
-name: guestxr
+name: gxr-climate-game
 channels:
   - defaults
   - conda-forge
