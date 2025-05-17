@@ -1,0 +1,14 @@
+name: guestxr
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.12.9
+  - pip
+  - pip:
+    - pandas
+    - pre-commit
+    - ruff
+    - ipykernel
+    - git+ssh://git@github.com/iss-obuz/gxr-envir.git
+    - --editable .
