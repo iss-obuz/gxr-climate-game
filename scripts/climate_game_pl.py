@@ -26,7 +26,7 @@ file_name = datetime.datetime.now().strftime(
 sex_users = {
     "guestxr.oculusc@gmail.com": "man_rich",
     "weronika.m.lewandowska@gmail.com": "woman_rich",
-    "guestxr.oculusd@gmail.com": "man",
+    "guestxr.oculusd@gmail.com": "woman_poor",
     "guestxroculusa@gmail.com": "woman_rich",
     "guestxrgogleb@gmail.com": "woman_rich",
 }
