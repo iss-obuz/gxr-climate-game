@@ -20,7 +20,7 @@ conda env create --file environment.yaml
 ```bash
 pre-commit install
 ```
-3. Cross fingers.
+4. Cross fingers.
 
 ## Running the game
 

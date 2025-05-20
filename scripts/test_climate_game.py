@@ -61,8 +61,14 @@ game.connect()
 
 # %%
 ## Play a round
-game.play_round(file_name=file_name, ri=test_round)
+game.clinet.PushCommand("set_laser_pointer_active", "true")
+time.sleep(1)
+game.client.PushCommand("show_text", f'global_message "Runda{test_round}" 1.0')
+game.gameStarted = True
 
+game.play_round(file_name=file_name, ri=test_round)
+game.i = 0
+game.gameStarted = False
 # %%
 ## Change the value for testing purposes.
 game.set_eqaul_wealth(value=test_value)
