@@ -854,6 +854,7 @@ class Game:
                 "play_audio_clip", "signal.opus source 0.5 0.0 false"
             )
             if ri == self.NR:
+                self.client.PushCommand("set_laser_pointer_active", "false")
                 time.sleep(2)
                 break
             ## Activate the lasers
