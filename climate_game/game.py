@@ -769,7 +769,8 @@ class Game:
         """Colors the cubes depending on the environment state."""
         for key, value in self.cubes_color.items():
             if value < self.EnviCondition:
-                self.cube_manager.set_color_all_objects(key)
+                color = key
+        self.cube_manager.set_color_all_objects(color)
 
     def play(self, file_name: str, interventions_active: bool = True):
         """Play the whole game.
