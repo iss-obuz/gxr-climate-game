@@ -41,8 +41,8 @@ def main() -> None:
         cube=CubeManager,
         live_event=LiveEventType,
         envir_game=EnvirGame,
-        n_players=3,
-        n_rounds=8,
+        n_players=n_players,
+        n_rounds=nr_rounds,
         nick_to_player_id=nicks_player_nr,
         h_rate=H_Rate_One_Shot,
         wealth_objects=wealth_objects,
@@ -51,7 +51,7 @@ def main() -> None:
     game.set_number_rounds(number_rounds=nr_rounds)
     game.set_sex(dct=sex_users)
     game.connect()
-    game.play(file_name=file_name)
+    game.play(file_name=file_name, interventions_active=False)
 
 
 # %%

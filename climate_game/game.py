@@ -141,9 +141,9 @@ class Game:
         max_wealth = abs(max(self._wealth_dct.values()))
 
         if max_wealth - min_wealth < 4:
-            self.set_equalt_wealth(True)
+            self.set_equal_wealth(True)
         else:
-            self.set_eqaul_wealth(False)
+            self.set_equal_wealth(False)
 
     def _set_avatars(self) -> None:
         """Sets the sex of avatars.
@@ -265,16 +265,14 @@ class Game:
         player_i : int
             player index
 
-        player_n : _type_
+        player_n : int
             player number
         """
         pUr = self.game.U[player_i]  # player Utility
         for key, value in self.wealth_objects.items():
             if pUr > key[0] and pUr <= key[1]:
                 for k, v in value.items():
-                    self.client.PushCommand(
-                        f"{key}_object", f"participant{player_n}_{v}"
-                    )
+                    self.client.PushCommand(f"{k}_object", f"participant{player_n}_{v}")
 
     def handler(self, source, args):
         # to synchronize the starting moment
@@ -488,6 +486,80 @@ class Game:
         # Disable Instructor.
         self.client.PushCommand("disable_object", "instructor")
 
+    def no_instructions(self):
+        """Play the initial instructions."""
+        ## Change the string on the players display.
+        for i in range(1, 6):
+            self.client.PushCommand(
+                "show_text",
+                f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
+            )
+
+        ## Instruction 1
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_01")
+        print("Take 01 ......")
+        ## Wait for the clip to end
+        time.sleep(56)
+
+        ## Instruciton 2
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_02")
+        print("Take 02 ......")
+        ## Wait for the clip to end
+        time.sleep(44)
+        ## Activate the laser.
+        self.client.PushCommand("set_laser_pointer_active", "true")
+        time.sleep(2)
+
+        ## Instruction 3 -- Synchronization
+        waitTimeN = 0
+        ## Waiting till everyone uses their lasers.
+        while self.isSyncPhase:
+            time.sleep(0.1)
+            waitTimeN += 1
+            if waitTimeN % 100 == 0:
+                self.client.PushCommand(
+                    "play_take", "ClimateChange_Instruct_pl_noinv_03"
+                )
+                print("Take 03 ......")
+                ## Wait for the clip to end
+                time.sleep(16)
+
+        ## Make the cobes green
+        self.cube_manager.set_color_all_objects("#40982f")
+        ## Deactivate the laser
+        self.client.PushCommand("set_laser_pointer_active", "false")
+        time.sleep(2)
+        print("Synchronization completed.\n Lasers inactive.")
+
+        ## Instruction 4
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_04")
+        print("Take 04 ......")
+        ## Wait for the clip to end
+        time.sleep(4)
+
+        ## Instruction 5
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_05")
+        print("Take 05 ......")
+        ## Wait for the clip to end
+        time.sleep(115)
+
+        ## Instruciton 6
+        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_06")
+        print("Take 06 ......")
+        ## Wait for the clip to end
+        time.sleep(3)
+
+        ## Instruction 7
+        self.client.PushCommand(
+            "play_take", "ClimateChange_Instruct_pl_noinv_07"
+        )  # zawiera ping
+        print("Take 07 ......")
+        ## Wait for the clip to end
+        time.sleep(22)
+
+        # Disable Instructor.
+        self.client.PushCommand("disable_object", "instructor")
+
     def play_round(self, file_name: str, ri: int):
         """Play a single round of the game.
 
@@ -679,7 +751,7 @@ class Game:
             if value < self.EnviCondition:
                 self.cube_manager.set_color_all_objects(key)
 
-    def play(self, file_name: str):
+    def play(self, file_name: str, interventions_active: bool = True):
         """Play the whole game.
 
         Parameters
@@ -688,7 +760,10 @@ class Game:
             the name of the file to which the results will be stored.
         """
         ## Play Instructions
-        self.instructions()
+        if interventions_active:
+            self.instructions()
+        else:
+            self.no_instructions()
 
         ## Disable Audio
         for userID in self.UserIdToPlayerIndex.keys():
@@ -746,7 +821,8 @@ class Game:
             self._compute_equality()
 
             ## Select the intervention
-            self.interventions(ri=ri)
+            if interventions_active:
+                self.interventions(ri=ri)
 
             ## Play the intervention
             self.play_intervention()
@@ -754,14 +830,15 @@ class Game:
             ## Wait till intervention to end.
             time.sleep(9)
 
-            ## Change the color of the tree
-            self.change_tree()
+            if interventions_active:
+                ## Change the color of the tree
+                self.change_tree()
 
-            ## Change the color of the outside world
-            self.change_world()
+                ## Change the color of the outside world
+                self.change_world()
 
-            ## Activate the red fog
-            self.activate_fog()
+                ## Activate the red fog
+                self.activate_fog()
 
             ## Wait for changes to take effect
             time.sleep(3)

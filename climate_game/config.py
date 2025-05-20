@@ -33,7 +33,7 @@ wealth_objects = {
 }
 
 cubes_colors = {
-    "#40982f": 0.5,  ## green
-    "#af9410": 0.3,  ## orange
     "#af1010": 0,  ## red
+    "#af9410": 0.3,  ## orange
+    "#40982f": 0.5,  ## green
 }
