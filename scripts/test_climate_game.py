@@ -18,8 +18,8 @@ from KiinClient import Guest  ## noqa
 
 # %%
 ## Define globals
-n_players = 3  ## number of players plaing the game - not observersa
-nr_rounds = 8  ## Number of rounds
+n_players = 1  ## number of players plaing the game - not observersa
+nr_rounds = 1  ## Number of rounds
 test_round = 1  ## Starst from 0
 test_value = True  ## Hardwire the equal_wealth
 H_Rate_One_Shot = 0.1  ## How much the single shot takes of the resource
@@ -45,8 +45,8 @@ game = Game(
     cube=CubeManager,
     envir_game=EnvirGame,
     live_event=LiveEventType,
-    n_players=3,
-    n_rounds=8,
+    n_players=n_players,
+    n_rounds=nr_rounds,
     nick_to_player_id=nicks_player_nr,
     h_rate=H_Rate_One_Shot,
     wealth_objects=wealth_objects,
@@ -61,7 +61,7 @@ game.connect()
 
 # %%
 ## Play a round
-game.clinet.PushCommand("set_laser_pointer_active", "true")
+game.client.PushCommand("set_laser_pointer_active", "true")
 time.sleep(1)
 game.client.PushCommand("show_text", f'global_message "Runda{test_round}" 1.0')
 game.gameStarted = True

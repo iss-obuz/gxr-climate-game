@@ -124,6 +124,7 @@ class Game:
         self.world = world
         self.fog = fog
         self.cubes_color = cubes_color
+        self._user_niks = []
 
     def set_equal_wealth(self, value: bool):
         """Sets the value of self._equal_wealth
@@ -202,7 +203,6 @@ class Game:
 
     def createLookupDictionary(self):
         user_ids_for_expected_players = []
-        user_niks = []
         for player in self.client.GetPlayersList():
             if player.NickName in self.NickNameToPlayerNR.keys():
                 user_ids_for_expected_players.append(player.UserId)  # player_id
@@ -210,18 +210,38 @@ class Game:
                 player.NickName != "The_Guest"
                 and player.NickName in self.NickNameToPlayerNR.keys()
             ):
-                user_niks.append(player.NickName)
+                self._user_niks.append(player.NickName)
         self.UserIdToPlayerIndex = {
             user_id: index
             for index, user_id in enumerate(user_ids_for_expected_players)
         }
         self.NickNameToPlayerIndex = {
-            user_nik: index for index, user_nik in enumerate(user_niks)
+            user_nik: index for index, user_nik in enumerate(self._user_niks)
         }
         self.PlayerIndexToPlayerNr = {
             index: self.NickNameToPlayerNR[user_nik]
-            for index, user_nik in enumerate(user_niks)
+            for index, user_nik in enumerate(self._user_niks)
         }
+
+    def lookup_place_nick(self, place: str) -> str:
+        """Returns the nickname of the player sitting in a given place.
+
+        Parameters
+        ----------
+        place : str
+            the place where the player is sitting.
+        Returns
+        -------
+        str
+            the nickname of the player.
+        """
+        self.createLookupDictionary()
+        look_up = {
+            value: key
+            for key, value in self.NickNameToPlayerNR.items()
+            if key in self._user_niks
+        }
+        return look_up[place]
 
     def NickNamefromPlayerId(self, PlayerID):
         playerlist = self.client.GetPlayersList()
@@ -608,10 +628,10 @@ class Game:
                     "rQ": len(self.cube_manager.removed_cubes),
                     "aQ": len(self.cube_manager.avaliable_cubes),
                     "Enviornment Condition": envE / envK,
-                    **self._wealth_dct,
-                    "UserIdToPlayerIndex": self.UserIdToPlayerIndex,
-                    "NickNameToPlayerIndex": self.NickNameToPlayerIndex,
-                    "PlayerIndexToPlayerNr": self.PlayerIndexToPlayerNr,
+                    **{
+                        self.lookup_place_nick(key): value
+                        for key, value in self._wealth_dct.items()
+                    },
                 }
                 file.write(json.dumps(tmp) + "\n")
 
