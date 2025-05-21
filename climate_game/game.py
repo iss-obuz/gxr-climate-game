@@ -873,8 +873,10 @@ class Game:
             self.client.SendGenericCommand(
                 "play_audio_clip", "signal.opus source 0.5 0.0 false"
             )
-            if ri == self.NR:
+            if (ri + 1) == self.NR:
                 self.client.PushCommand("set_laser_pointer_active", "false")
+                ## Change the color of cubes to gray.
+                self.cube_manager.set_color_all_objects("#777777")
                 time.sleep(2)
                 break
             ## Activate the lasers
