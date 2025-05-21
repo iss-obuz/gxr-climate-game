@@ -235,7 +235,6 @@ class Game:
         str
             the nickname of the player.
         """
-        self.createLookupDictionary()
         look_up = {
             value: key
             for key, value in self.NickNameToPlayerNR.items()
