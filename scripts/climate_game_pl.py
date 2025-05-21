@@ -24,11 +24,11 @@ file_name = datetime.datetime.now().strftime(
 
 ## Sex of the users
 sex_users = {
-    "guestxr.oculusc@gmail.com": "man_rich",
+    "guestxr.oculusc@gmail.com": "woman_rich",
     "weronika.m.lewandowska@gmail.com": "woman_rich",
-    "guestxr.oculusd@gmail.com": "woman_poor",
+    "guestxr.oculusd@gmail.com": "man_rich",
     "guestxroculusa@gmail.com": "woman_rich",
-    "guestxrgogleb@gmail.com": "woman_rich",
+    "guestxrgogleb@gmail.com": "woman_poor",
 }
 
 
