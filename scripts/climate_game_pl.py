@@ -24,11 +24,11 @@ file_name = datetime.datetime.now().strftime(
 
 ## Sex of the users
 sex_users = {
-    "guestxr.oculusc@gmail.com": "woman_rich",
+    "guestxr.oculusc@gmail.com": "man_rich",
     "weronika.m.lewandowska@gmail.com": "woman_rich",
-    "guestxr.oculusd@gmail.com": "man_rich",
-    "guestxroculusa@gmail.com": "woman_rich",
-    "guestxrgogleb@gmail.com": "woman_poor",
+    "guestxr.oculusd@gmail.com": "man_poor",
+    "guestxroculusa@gmail.com": "man",
+    "guestxrgogleb@gmail.com": "man",
 }
 
 
@@ -51,7 +51,7 @@ def main() -> None:
     game.set_number_rounds(number_rounds=nr_rounds)
     game.set_sex(dct=sex_users)
     game.connect()
-    game.play(file_name=file_name, interventions_active=False)
+    game.play(file_name=file_name, interventions_active=True)
 
 
 # %%

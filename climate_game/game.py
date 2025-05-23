@@ -690,6 +690,8 @@ class Game:
                 self.intervention = "Audio_9_SP_pl"
             else:
                 self.intervention = "Audio_9_SN_pl"
+        else:
+            self.intervention = ""
 
     def play_intervention(self):
         """Plays the intervention audio and prints its name to the screen."""
