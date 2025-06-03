@@ -1,7 +1,7 @@
 # %% 
 import matplotlib.pyplot as plt
-import json
 from climate_game import PNG, DATA
+from climate_game.utils import merge_rounds, headset_name
 import os
 from collections import defaultdict
 import re
@@ -9,65 +9,50 @@ import pandas as pd
 
 # %%
 rgx = re.compile(r"\d{4}_\d{2}_\d{2}_\d{2}_\d{2}")
-
-def get_round(name: str) -> int:
-    """Get the round number from the name of the file.
-
-    Parameters
-    ----------
-    name
-        name of the file
-
-    Returns
-    -------
-        round number
-    """
-    rgx = re.compile(r"\d\.")
-    return int(rgx.search(name).group().replace(".", ""))
-    
-
+conditions = { 
+              "2025_05_16_17_04" : "Interventions",
+              "2025_05_16_16_12" : "Interventions",
+              "2025_05_23_15_45" : "Intervnetions",
+              "2025_05_20_15_15" : "No Interventions",
+              "2025_05_20_16_12" : "No Interventions",
+              "2025_05_21_16_07" : "No Interventions",
+}
 # %%
 fls_dct = defaultdict(list)
 for item in os.scandir(DATA):
     fls_dct[rgx.search(item.name).group()] += [item]
     
-fls_dct = { key : value for key, value in fls_dct.items() if len(value) == 8 }
 # %%
-for game in fls_dct:
-    output = []
-    for file_name in fls_dct[game]:
-        with open(file_name, "r") as file:
-            for line in file.readlines():
-                tmp = json.loads(line)
-                tmp.update({ "round" : get_round(file_name.name)})
-                output.append(tmp)
-    
-
+for game in conditions:
+    print(f"Plot game {game} from {conditions[game]} condition.")
+    output = merge_rounds(lst = fls_dct[game])
     df = pd.DataFrame.from_dict(output)
     df = df.reset_index().sort_values(["round", "index"])
-    fig, ax1 = plt.subplots(figsize = (9,4))
-    fig.subplots_adjust(wspace=0.5, hspace=0.20, top=0.85, bottom=0.05)
+    df = headset_name(df)
+
+    fig, ax1 = plt.subplots(figsize = (9,5))
+    fig.subplots_adjust(wspace=0.5, hspace=0.20, top=0.95, bottom=0.05)
     ax2 = ax1.twinx()
 
 
-    ax1.plot(df.reset_index()["Enviornment Condition"], color = "black")
-    if len(df.columns) < 9:
-        continue
-    if "2" in df.columns:
-        ax2.plot(df.reset_index()["2"])
-        ax2.plot(df.reset_index()["3"])
-        ax2.plot(df.reset_index()["5"])
-    else:
-        ax2.plot(df.reset_index()["guestxr.oculusd@gmail.com"])
-        ax2.plot(df.reset_index()["guestxr.oculusc@gmail.com"])
-        ax2.plot(df.reset_index()["guestxrgogleb@gmail.com"])
-    ax2.set_xlim(0,240)    
+    ax1.plot(df.reset_index()["Enviornment Condition"], color = "black", linestyle='dashed', linewidth = .7)
+    ax2.plot(df.reset_index()["Headset B"], label = "Headset B", linewidth = .9)
+    ax2.plot(df.reset_index()["Headset C"], label = "Headset C", linewidth = .9)
+    ax2.plot(df.reset_index()["Headset D"], label = "Headset D", linewidth = .9)
+    ax2.legend(loc = "lower center", bbox_to_anchor = (.5, -.15), ncols = 3)
+    ax2.set_xlim(-1,241) 
+    ax1.set_ylim(0,1.1)
     for x in range(0, 240, 60):
         ax1.axvspan(x, x+30, facecolor='gray', alpha=.2)
-    ax2.set_ylabel("Resources")
-    ax1.set_ylabel("Environmentl Condition")
-    plt.title(game)
-    plt.savefig(PNG/f"{game}.png", dpi = 200)
-    plt.show()
+    for x in range(0, 8,1):
+        ax1.text(x = x * 30 + 15, y = 1.15, s = f"Round {x + 1}", horizontalalignment='center', verticalalignment='center')
+    ax1.hlines(xmin = 0, xmax = 240,y = .5, color = "#af9410", linestyles = "dashed", linewidth = .7)
+    ax1.hlines(xmin = 0, xmax = 240,y = .3, color = "#af1010", linestyles = "dashed", linewidth = .7)
+    ax2.set_ylabel("Resources", rotation = 270)
+    ax1.set_ylabel("Environment Condition")
+    ax2.set_position([0.1,0.15,.8,.75])
+    plt.savefig(PNG/f"{"_".join(conditions[game].lower().split())}_{game}.png", dpi = 200)
+    if __name__ not in "__main__":
+        plt.show()
 
 # %%

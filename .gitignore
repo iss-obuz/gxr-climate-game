@@ -12,6 +12,9 @@ log/**
 # Data
 data/**
 
+# Graphs
+*/*.png
+
 # IDEs
 .vscode
 

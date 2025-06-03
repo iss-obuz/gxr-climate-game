@@ -37,3 +37,5 @@ cubes_colors = {
     "#af9410": 0.3,  ## orange
     "#40982f": 0.5,  ## green
 }
+
+

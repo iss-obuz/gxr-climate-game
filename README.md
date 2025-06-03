@@ -29,3 +29,7 @@ In general, I would advise running the game from Visual Studio Code. First, you 
 ## Testing the game
 
 If you know what you are doing, it is possible to run the game in interactive mode. Open in Visual Code the script `test_climate_game_pl.py`. You can run chunk after chunk to add new effects to the game.
+
+## Plotting the results
+
+The `plot_rounds.py` will plot time series for all the games.

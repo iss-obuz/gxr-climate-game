@@ -10,5 +10,6 @@ dependencies:
     - pre-commit
     - ruff
     - ipykernel
+    - pytest
     - git+ssh://git@github.com/iss-obuz/gxr-envir.git
     - --editable .
