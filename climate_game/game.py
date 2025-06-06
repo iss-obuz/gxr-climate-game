@@ -670,13 +670,13 @@ class Game:
             else:
                 self.intervention = "Audio_12_SN_pl"
         elif ri == 4:
-            if self.EnviCondition_start - self.EnviCondition > 0.2:
-                self.intervention = "Audio_1_EN_pl"
-            elif (
+            if (
                 self.EnviCondition - self.EnviCondition_start > 0.2
                 and self.EnviCondition > 0.3
             ):
                 self.intervention = "Audio_1_EP_pl"
+            elif self.EnviCondition_start - self.EnviCondition > 0.2:
+                self.intervention = "Audio_1_EN_pl"
             else:
                 self.intervention = ""
         elif ri == 5:
