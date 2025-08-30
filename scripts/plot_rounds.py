@@ -115,7 +115,7 @@ all_df = (
 )
 
 # %%
-fig, ax1 = plt.subplots(figsize=(9, 5))
+fig, ax1 = plt.subplots(figsize=(7, 4))
 
 ax1.plot(
     all_df.query("condition == 'Interventions'").reset_index()["average_player"],
@@ -135,28 +135,28 @@ ax1.plot(
     color="orange",
     linestyle="dashed",
 )
-ax1.legend(loc="lower center", bbox_to_anchor=(0.5, -0.17), ncols=2, fontsize=13)
+ax1.legend(loc="lower center", bbox_to_anchor=(0.5, -0.35), ncols=2, fontsize=15)
 ax1.set_xlim(-1, 241)
 for x in range(0, 240, 60):
     ax1.axvspan(x, x + 30, facecolor="gray", alpha=0.2)
 for x in range(0, 8, 1):
     ax1.text(
         x=x * 30 + 15,
-        y=14.75,
+        y=15.25,
         s=f"Round {x + 1}",
         horizontalalignment="center",
         verticalalignment="center",
-        fontsize=12,
+        fontsize=10,
         fontdict={"weight": "bold"},
     )
-ax1.set_ylabel("Wealth\n(accumulated profit)", fontsize=12, fontdict={"weight": "bold"})
+ax1.set_ylabel("Wealth\n(accumulated profit)", fontsize=14, fontdict={"weight": "bold"})
 plt.tight_layout()
 
 plt.savefig(PNG / "average_wealth.png", dpi=200)
 if __name__ not in "__main__":
     plt.show()
 # %%
-fig, ax1 = plt.subplots(figsize=(9, 5))
+fig, ax1 = plt.subplots(figsize=(7, 4))
 
 ax1.plot(
     all_df.query("condition == 'Interventions'").reset_index()["Enviornment Condition"],
@@ -170,7 +170,7 @@ ax1.plot(
     linewidth=1.5,
     label="No Interventions",
 )
-ax1.legend(loc="lower center", bbox_to_anchor=(0.5, -0.17), ncols=2, fontsize=13)
+ax1.legend(loc="lower center", bbox_to_anchor=(0.5, -0.3), ncols=2, fontsize=15)
 ax1.set_xlim(-1, 241)
 ax1.set_ylim(0, 1.1)
 for x in range(0, 240, 60):
@@ -182,12 +182,12 @@ for x in range(0, 8, 1):
         s=f"Round {x + 1}",
         horizontalalignment="center",
         verticalalignment="center",
-        fontsize=12,
+        fontsize=10,
         fontdict={"weight": "bold"},
     )
 ax1.hlines(xmin=0, xmax=240, y=0.5, color="#af9410", linestyles="dashed", linewidth=1.5)
 ax1.hlines(xmin=0, xmax=240, y=0.3, color="#af1010", linestyles="dashed", linewidth=1.5)
-ax1.set_ylabel("Environment Condition", fontsize=12, fontdict={"weight": "bold"})
+ax1.set_ylabel("Environment Condition", fontsize=14, fontdict={"weight": "bold"})
 plt.tight_layout()
 
 plt.savefig(PNG / "average_environment.png", dpi=200)
