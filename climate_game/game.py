@@ -129,6 +129,119 @@ class Game:
         self.cubes_color = cubes_color
         self._user_niks = []
         self._lang = lang
+        self._round_msg = ""
+        self._score_msg = ""
+        self._pause_msg = ""
+        self._welcome_msg = ""
+        self._instruction_msg = ""
+        self._strings = {
+            "pl": {
+                "score_msg": "Posiadane zasoby:",
+                "round_msg": "Runda",
+                "pause_msg": "Przerwa",
+                "welcome_msg": "Witajcie!",
+                "instruction_msg": "Proszę skup się teraz na instrukcji",
+            },
+            "en": {
+                "score_msg": "Current resources:",
+                "round_msg": "Round",
+                "pause_msg": "Pause",
+                "welcome_msg": "Welcome!",
+                "instruction_msg": "Please follow the instruction",
+            },
+        }
+        self._audios = {
+            "pl": {
+                "take_1": {
+                    "name": "ClimateChange_Instruct_pl_01",
+                    "duration": 52.062041666666666,
+                },
+                "take_2": {
+                    "name": "ClimateChange_Instruct_pl_02",
+                    "duration": 60.9959375,
+                },
+                "take_3": {
+                    "name": "ClimateChange_Instruct_pl_03",
+                    "duration": 13.5575625,
+                },
+                "take_4": {
+                    "name": "ClimateChange_Instruct_pl_04",
+                    "duration": 4.5191875,
+                },
+                "take_5": {
+                    "name": "ClimateChange_Instruct_pl_05",
+                    "duration": 138.266125,
+                },
+                "take_6": {
+                    "name": "ClimateChange_Instruct_pl_06",
+                    "duration": 17.893895833333332,
+                },
+                "take_7": {
+                    "name": "ClimateChange_Instruct_pl_07",
+                    "duration": 22.360833333333332,
+                },
+                "take_8": {
+                    "name": "ClimateChange_Instruct_pl_08",
+                    "duration": 13.229270833333334,
+                },
+            },
+            "pl_noin": {
+                "take_1": {
+                    "name": "ClimateChange_Instruct_pl_noinv_01",
+                    "duration": 56,
+                },
+                "take_2": {
+                    "name": "ClimateChange_Instruct_pl_noinv_02",
+                    "duration": 44,
+                },
+                "take_3": {
+                    "name": "ClimateChange_Instruct_pl_noinv_03",
+                    "duration": 16,
+                },
+                "take_4": {"name": "ClimateChange_Instruct_pl_noinv_04", "duration": 4},
+                "take_5": {
+                    "name": "ClimateChange_Instruct_pl_noinv_05",
+                    "duration": 115,
+                },
+                "take_6": {"name": "ClimateChange_Instruct_pl_noinv_06", "duration": 3},
+                "take_7": {
+                    "name": "ClimateChange_Instruct_pl_noinv_07",
+                    "duration": 22,
+                },
+                "take_8": {
+                    "name": "ClimateChange_Instruct_pl_08",
+                    "duration": 13.229270833333334,
+                },
+            },
+            "en": {
+                "take_1": {"name": "ClimateChange_Instruct_01", "duration": 50.605688},
+                "take_2": {"name": "ClimateChange_Instruct_02", "duration": 74.377125},
+                "take_3": {"name": "ClimateChange_Instruct_03", "duration": 7.5003646},
+                "take_4": {"name": "ClimateChange_Instruct_04", "duration": 2.932229},
+                "take_5": {"name": "ClimateChange_Instruct_05", "duration": 124.558354},
+                "take_6": {"name": "ClimateChange_Instruct_06", "duration": 13.041604},
+                "take_7": {"name": "ClimateChange_Instruct_07", "duration": 14.922438},
+                "take_8": {"name": "ClimateChange_Instruct_08", "duration": 14.452229},
+            },
+        }
+        self._takes = {}
+
+    def _set_language(self):
+        """Sets the language of the game."""
+        for key, value in self._strings.items():
+            if key == self._lang:
+                self._round_msg = value["round_msg"]
+                self._score_msg = value["score_msg"]
+                self._pause_msg = value["pause_msg"]
+                self._welcome_msg = value["welcome_msg"]
+                self._instruction_msg = value["instruction_msg"]
+
+    def _set_takes_language(self, interventions_active: bool = True):
+        """Sets the audio takes according to the language of the game."""
+        lang = self._lang if interventions_active else self._lang + "_noin"
+        for key, value in self._audios.items():
+            if key == lang:
+                self._takes = value
 
     def set_equal_wealth(self, value: bool):
         """Sets the value of self._equal_wealth
@@ -379,6 +492,8 @@ class Game:
         )
         self.print_player_list()
         time.sleep(5)
+        print("Change language of the game...")
+        self._set_language()
 
         # synchronization of the start time from Bernhard
         self.customEventTime = datetime.datetime.now
@@ -400,10 +515,9 @@ class Game:
         self.client.PushCommand("disable_object", "ParticleSystem")
 
         ## Set the global message.
-        if self._lang == "pl":
-            self.client.PushCommand("show_text", 'global_message "Cześć!" 1.0')
-        else:
-            self.client.PushCommand("show_text", 'global_message "Welcome!" 1.0')
+        self.client.PushCommand(
+            "show_text", f'global_message "{self._welcome_msg}" 1.0'
+        )
 
         ## Set the sex of avatars.
         self._set_avatars()
@@ -442,30 +556,24 @@ class Game:
 
     def instructions(self):
         """Play the initial instructions."""
+
         ## Change the string on the players display.
         for i in range(1, 6):
-            if self._lang == "pl":
-                self.client.PushCommand(
-                    "show_text",
-                    f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
-                )
-            else:
-                self.client.PushCommand(
-                    "show_text",
-                    f'participant{i}_score_text "Please follow the instruction" 1.0',
-                )
-
+            self.client.PushCommand(
+                "show_text",
+                f"participant{i}_score_text {self._instruction_msg} 1.0",
+            )
         ## Instruction 1
-        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_01")
+        self.client.PushCommand("play_take", f"{self._takes['take_1']['name']}")
         print("Take 01 ......")
         ## Wait for the clip to end
-        time.sleep(52.062041666666666)
+        time.sleep(self._takes["take_1"]["duration"])
 
         ## Instruciton 2
-        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_02")
+        self.client.PushCommand("play_take", f"{self._takes['take_2']['name']}")
         print("Take 02 ......")
         ## Wait for the clip to end
-        time.sleep(60.9959375)
+        time.sleep(self._takes["take_2"]["duration"])
         ## Activate the laser.
         self.client.PushCommand("set_laser_pointer_active", "true")
         time.sleep(2)
@@ -477,12 +585,10 @@ class Game:
             time.sleep(0.1)
             waitTimeN += 1
             if waitTimeN % 100 == 0:
-                self.client.PushCommand(
-                    "play_take", f"ClimateChange_Instruct_{self._lang}_03"
-                )
+                self.client.PushCommand("play_take", f"{self._takes['take_3']['name']}")
                 print("Take 03 ......")
                 ## Wait for the clip to end
-                time.sleep(13.5575625)
+                time.sleep(self._takes["take_3"]["duration"])
 
         ## Make the cobes green
         self.cube_manager.set_color_all_objects("#40982f")
@@ -492,120 +598,30 @@ class Game:
         print("Synchronization completed.\n Lasers inactive.")
 
         ## Instruction 4
-        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_04")
+        self.client.PushCommand("play_take", f"{self._takes['take_4']['name']}")
         print("Take 04 ......")
         ## Wait for the clip to end
-        time.sleep(4.5191875)
+        time.sleep(self._takes["take_4"]["duration"])
 
         ## Instruction 5
-        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_05")
+        self.client.PushCommand("play_take", f"{self._takes['take_5']['name']}")
         print("Take 05 ......")
         ## Wait for the clip to end
-        time.sleep(138.266125)
+        time.sleep(self._takes["take_5"]["duration"])
 
         ## Instruciton 6
-        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_06")
+        self.client.PushCommand("play_take", f"{self._takes['take_6']['name']}")
         print("Take 06 ......")
         ## Wait for the clip to end
-        time.sleep(17.893895833333332)
+        time.sleep(self._takes["take_6"]["duration"])
 
         ## Instruction 7
         self.client.PushCommand(
-            "play_take", f"ClimateChange_Instruct_{self._lang}_07"
+            "play_take", f"{self._takes['take_7']['name']}"
         )  # zawiera ping
         print("Take 07 ......")
         ## Wait for the clip to end
-        time.sleep(22.360833333333332)
-
-        # Disable Instructor.
-        self.client.PushCommand("disable_object", "instructor")
-
-    def no_instructions(self):
-        """Play the initial instructions."""
-        ## Change the string on the players display.
-        for i in range(1, 6):
-            if self._lang == "pl":
-                self.client.PushCommand(
-                    "show_text",
-                    f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
-                )
-            else:
-                self.client.PushCommand(
-                    "show_text",
-                    f'participant{i}_score_text "Please follow the instruction" 1.0',
-                )
-
-        ## Instruction 1
-        self.client.PushCommand(
-            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_01"
-        )
-        print("Take 01 ......")
-        ## Wait for the clip to end
-        time.sleep(56)
-
-        ## Instruciton 2
-        self.client.PushCommand(
-            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_02"
-        )
-        print("Take 02 ......")
-        ## Wait for the clip to end
-        time.sleep(44)
-        ## Activate the laser.
-        self.client.PushCommand("set_laser_pointer_active", "true")
-        time.sleep(2)
-
-        ## Instruction 3 -- Synchronization
-        waitTimeN = 0
-        ## Waiting till everyone uses their lasers.
-        while self.isSyncPhase:
-            time.sleep(0.1)
-            waitTimeN += 1
-            if waitTimeN % 100 == 0:
-                self.client.PushCommand(
-                    "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_03"
-                )
-                print("Take 03 ......")
-                ## Wait for the clip to end
-                time.sleep(16)
-
-        ## Make the cobes green
-        self.cube_manager.set_color_all_objects("#40982f")
-        ## Deactivate the laser
-        self.client.PushCommand("set_laser_pointer_active", "false")
-        time.sleep(2)
-        print("Synchronization completed.\n Lasers inactive.")
-
-        ## Instruction 4
-        self.client.PushCommand(
-            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_04"
-        )
-        print("Take 04 ......")
-        ## Wait for the clip to end
-        time.sleep(4)
-
-        ## Instruction 5
-        self.client.PushCommand(
-            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_05"
-        )
-        print("Take 05 ......")
-        ## Wait for the clip to end
-        time.sleep(115)
-
-        ## Instruciton 6
-        self.client.PushCommand(
-            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_06"
-        )
-        print("Take 06 ......")
-        ## Wait for the clip to end
-        time.sleep(3)
-
-        ## Instruction 7
-        self.client.PushCommand(
-            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_07"
-        )  # zawiera ping
-        print("Take 07 ......")
-        ## Wait for the clip to end
-        time.sleep(22)
+        time.sleep(self._takes["take_7"]["duration"])
 
         # Disable Instructor.
         self.client.PushCommand("disable_object", "instructor")
@@ -647,7 +663,7 @@ class Game:
 
                 for p_i in range(self.game.n_agents):
                     player_n = self.PlayerIndexToPlayerNr[p_i]
-                    score_str = f'participant{player_n}_score_text "Posiadane zasoby: {round(self.game.U[p_i], 2)}" 1'
+                    score_str = f'participant{player_n}_score_text "{self._score_msg} {round(self.game.U[p_i], 2)}" 1'
                     self.client.SendGenericCommand("show_text", score_str)
                     self.update_wealth(p_i, player_n)
                     self._wealth_dct[player_n] = round(self.game.U[p_i], 2)
@@ -812,11 +828,11 @@ class Game:
         file_name : str
             the name of the file to which the results will be stored.
         """
+        ## Set the language of the takes
+        print("Setting language of the takes...")
+        self._set_takes_language(interventions_active=interventions_active)
         ## Play Instructions
-        if interventions_active:
-            self.instructions()
-        else:
-            self.no_instructions()
+        self.instructions()
 
         ## Disable Audio
         for userID in self.UserIdToPlayerIndex.keys():
@@ -831,7 +847,9 @@ class Game:
         ## Wait for the change to have the effect
         time.sleep(1)
         ## Show the first round message
-        self.client.PushCommand("show_text", 'global_message "Runda 1" 1.0')
+        self.client.PushCommand(
+            "show_text", f'global_message "{self._round_msg} 1" 1.0'
+        )
         ## Wait for the change to have the effect
         time.sleep(1)
         ## Start the game
@@ -841,7 +859,7 @@ class Game:
             self.client.PushCommand("fade_in", "1.0")
             if ri != 0:
                 self.client.PushCommand(
-                    "show_text", f'global_message "Runda {ri + 1}" 1.0'
+                    "show_text", f'global_message "{self._round_msg} {ri + 1}" 1.0'
                 )
 
             ## Play a round of the game
@@ -857,7 +875,9 @@ class Game:
                 "play_audio_clip", "signal.opus source 0.5 0.0 false"
             )
             ## Change the global message
-            self.client.PushCommand("show_text", 'global_message "Przerwa" 1.0')
+            self.client.PushCommand(
+                "show_text", f'global_message "{self._pause_msg}" 1.0'
+            )
 
             ## Change the color of cubes to gray.
             self.cube_manager.set_color_all_objects("#777777")
@@ -926,7 +946,7 @@ class Game:
 
         ## Instruction 8
         self.client.PushCommand(
-            "play_take", "ClimateChange_Instruct_pl_08"
+            "play_take", f"{self._takes['take_8']['name']}"
         )  # waiting for the end of the clip
         print("Take 08 ......")
-        time.sleep(16.404916666666665)
+        time.sleep(self._takes["take_8"]["duration"])

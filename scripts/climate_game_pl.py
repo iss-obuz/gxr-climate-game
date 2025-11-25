@@ -15,7 +15,7 @@ from KiinClient import Guest  ## noqa
 
 # %%
 ## Define globals
-n_players = 3  ## number of players plaing the game - not observersa
+n_players = 1  ## number of players plaing the game - not observersa
 nr_rounds = 8  ## Number of rounds
 H_Rate_One_Shot = 0.1  ## How much the single shot takes of the resource
 file_name = datetime.datetime.now().strftime(
@@ -47,6 +47,7 @@ def main() -> None:
         h_rate=H_Rate_One_Shot,
         wealth_objects=wealth_objects,
         cubes_color=cubes_colors,
+        lang="en",
     )
     game.set_number_rounds(number_rounds=nr_rounds)
     game.set_sex(dct=sex_users)
