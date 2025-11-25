@@ -26,6 +26,7 @@ class Game:
         tree: float = 0.5,
         world: float = 0.5,
         fog: float = 0.3,
+        lang: str = "pl",
     ):
         """Initilizes the game.
 
@@ -78,6 +79,8 @@ class Game:
             {
                 "#40982f" : .5
             }
+        lang : str, optional
+            the language of the game, by default "pl"
         """
         self.client = client
         self.config_SpaceRoom = config_SpaceRoom
@@ -125,6 +128,7 @@ class Game:
         self.fog = fog
         self.cubes_color = cubes_color
         self._user_niks = []
+        self._lang = lang
 
     def set_equal_wealth(self, value: bool):
         """Sets the value of self._equal_wealth
@@ -396,7 +400,10 @@ class Game:
         self.client.PushCommand("disable_object", "ParticleSystem")
 
         ## Set the global message.
-        self.client.PushCommand("show_text", 'global_message "Cześć!" 1.0')
+        if self._lang == "pl":
+            self.client.PushCommand("show_text", 'global_message "Cześć!" 1.0')
+        else:
+            self.client.PushCommand("show_text", 'global_message "Welcome!" 1.0')
 
         ## Set the sex of avatars.
         self._set_avatars()
@@ -437,19 +444,25 @@ class Game:
         """Play the initial instructions."""
         ## Change the string on the players display.
         for i in range(1, 6):
-            self.client.PushCommand(
-                "show_text",
-                f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
-            )
+            if self._lang == "pl":
+                self.client.PushCommand(
+                    "show_text",
+                    f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
+                )
+            else:
+                self.client.PushCommand(
+                    "show_text",
+                    f'participant{i}_score_text "Please follow the instruction" 1.0',
+                )
 
         ## Instruction 1
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_01")
+        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_01")
         print("Take 01 ......")
         ## Wait for the clip to end
         time.sleep(52.062041666666666)
 
         ## Instruciton 2
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_02")
+        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_02")
         print("Take 02 ......")
         ## Wait for the clip to end
         time.sleep(60.9959375)
@@ -464,7 +477,9 @@ class Game:
             time.sleep(0.1)
             waitTimeN += 1
             if waitTimeN % 100 == 0:
-                self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_03")
+                self.client.PushCommand(
+                    "play_take", f"ClimateChange_Instruct_{self._lang}_03"
+                )
                 print("Take 03 ......")
                 ## Wait for the clip to end
                 time.sleep(13.5575625)
@@ -477,26 +492,26 @@ class Game:
         print("Synchronization completed.\n Lasers inactive.")
 
         ## Instruction 4
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_04")
+        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_04")
         print("Take 04 ......")
         ## Wait for the clip to end
         time.sleep(4.5191875)
 
         ## Instruction 5
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_05")
+        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_05")
         print("Take 05 ......")
         ## Wait for the clip to end
         time.sleep(138.266125)
 
         ## Instruciton 6
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_06")
+        self.client.PushCommand("play_take", f"ClimateChange_Instruct_{self._lang}_06")
         print("Take 06 ......")
         ## Wait for the clip to end
         time.sleep(17.893895833333332)
 
         ## Instruction 7
         self.client.PushCommand(
-            "play_take", "ClimateChange_Instruct_pl_07"
+            "play_take", f"ClimateChange_Instruct_{self._lang}_07"
         )  # zawiera ping
         print("Take 07 ......")
         ## Wait for the clip to end
@@ -509,19 +524,29 @@ class Game:
         """Play the initial instructions."""
         ## Change the string on the players display.
         for i in range(1, 6):
-            self.client.PushCommand(
-                "show_text",
-                f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
-            )
+            if self._lang == "pl":
+                self.client.PushCommand(
+                    "show_text",
+                    f'participant{i}_score_text "Proszę skup się teraz na instrukcji" 1.0',
+                )
+            else:
+                self.client.PushCommand(
+                    "show_text",
+                    f'participant{i}_score_text "Please follow the instruction" 1.0',
+                )
 
         ## Instruction 1
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_01")
+        self.client.PushCommand(
+            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_01"
+        )
         print("Take 01 ......")
         ## Wait for the clip to end
         time.sleep(56)
 
         ## Instruciton 2
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_02")
+        self.client.PushCommand(
+            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_02"
+        )
         print("Take 02 ......")
         ## Wait for the clip to end
         time.sleep(44)
@@ -537,7 +562,7 @@ class Game:
             waitTimeN += 1
             if waitTimeN % 100 == 0:
                 self.client.PushCommand(
-                    "play_take", "ClimateChange_Instruct_pl_noinv_03"
+                    "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_03"
                 )
                 print("Take 03 ......")
                 ## Wait for the clip to end
@@ -551,26 +576,32 @@ class Game:
         print("Synchronization completed.\n Lasers inactive.")
 
         ## Instruction 4
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_04")
+        self.client.PushCommand(
+            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_04"
+        )
         print("Take 04 ......")
         ## Wait for the clip to end
         time.sleep(4)
 
         ## Instruction 5
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_05")
+        self.client.PushCommand(
+            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_05"
+        )
         print("Take 05 ......")
         ## Wait for the clip to end
         time.sleep(115)
 
         ## Instruciton 6
-        self.client.PushCommand("play_take", "ClimateChange_Instruct_pl_noinv_06")
+        self.client.PushCommand(
+            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_06"
+        )
         print("Take 06 ......")
         ## Wait for the clip to end
         time.sleep(3)
 
         ## Instruction 7
         self.client.PushCommand(
-            "play_take", "ClimateChange_Instruct_pl_noinv_07"
+            "play_take", f"ClimateChange_Instruct_{self._lang}_noinv_07"
         )  # zawiera ping
         print("Take 07 ......")
         ## Wait for the clip to end
@@ -645,51 +676,51 @@ class Game:
         self.intervnetion = ""
         if ri == 0:
             if self.EnviCondition > 0.5:
-                self.intervention = "Audio_7_TPP_pl"
+                self.intervention = f"Audio_7_TPP_{self._lang}"
 
             else:
-                self.intervention = "Audio_7_TPN_pl"
+                self.intervention = f"Audio_7_TPN_{self._lang}"
 
         elif ri == 1:
             if self.EnviCondition > 0.5:
-                self.intervention = "Audio_6_TPP_pl"
+                self.intervention = f"Audio_6_TPP_{self._lang}"
 
             else:
-                self.intervention = "Audio_6_TPN_pl"
+                self.intervention = f"Audio_6_TPN_{self._lang}"
 
         elif ri == 2:
             if self.EnviCondition > 0.5:
-                self.intervention = "Audio_6_TPP_pl"
+                self.intervention = f"Audio_6_TPP_{self._lang}"
 
             elif self.EnviCondition < 0.3:
-                self.intervention = "Audio_6_TPN_pl"
+                self.intervention = f"Audio_6_TPN_{self._lang}"
 
         elif ri == 3:
             if self._eqaul_wealth:
-                self.intervention = "Audio_12_SP_pl"
+                self.intervention = f"Audio_12_SP_{self._lang}"
             else:
-                self.intervention = "Audio_12_SN_pl"
+                self.intervention = f"Audio_12_SN_{self._lang}"
         elif ri == 4:
             if (
                 self.EnviCondition - self.EnviCondition_start > 0.2
                 and self.EnviCondition > 0.3
             ):
-                self.intervention = "Audio_1_EP_pl"
+                self.intervention = f"Audio_1_EP_{self._lang}"
             elif self.EnviCondition_start - self.EnviCondition > 0.2:
-                self.intervention = "Audio_1_EN_pl"
+                self.intervention = f"Audio_1_EN_{self._lang}"
             else:
                 self.intervention = ""
         elif ri == 5:
             if self.EnviCondition > 0.4:
-                self.intervention = "Audio_3_EP_pl"
+                self.intervention = f"Audio_3_EP_{self._lang}"
             else:
-                self.intervention = "Audio_3_EN_pl"
+                self.intervention = f"Audio_3_EN_{self._lang}"
 
         elif ri == 6:
             if self._eqaul_wealth:
-                self.intervention = "Audio_9_SP_pl"
+                self.intervention = f"Audio_9_SP_{self._lang}"
             else:
-                self.intervention = "Audio_9_SN_pl"
+                self.intervention = f"Audio_9_SN_{self._lang}"
         else:
             self.intervention = ""
 
