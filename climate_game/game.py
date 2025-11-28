@@ -674,6 +674,7 @@ class Game:
                     "rQ": len(self.cube_manager.removed_cubes),
                     "aQ": len(self.cube_manager.avaliable_cubes),
                     "Enviornment Condition": envE / envK,
+                    "Harvesting": self.H,
                     **{
                         self.lookup_place_nick(key): value
                         for key, value in self._wealth_dct.items()

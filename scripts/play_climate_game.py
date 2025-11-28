@@ -15,7 +15,7 @@ from KiinClient import Guest  ## noqa
 
 # %%
 ## Define globals
-n_players = 1  ## number of players plaing the game - not observersa
+n_players = 4  ## number of players plaing the game - not observersa
 nr_rounds = 8  ## Number of rounds
 H_Rate_One_Shot = 0.1  ## How much the single shot takes of the resource
 file_name = datetime.datetime.now().strftime(
