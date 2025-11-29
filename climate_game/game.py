@@ -133,7 +133,7 @@ class Game:
         self._score_msg = ""
         self._pause_msg = ""
         self._welcome_msg = ""
-        self._instruction_msg = ""
+        self._instruction_msg = "Proszę skup się teraz na instrukcji"
         self._strings = {
             "pl": {
                 "score_msg": "Posiadane zasoby:",
@@ -495,6 +495,13 @@ class Game:
         print("Change language of the game...")
         self._set_language()
 
+        ## Change the string on the players display.
+        for i in range(1, 6):
+            self.client.PushCommand(
+                "show_text",
+                f'participant{i}_score_text "{self._instruction_msg}" 1.0',
+            )
+
         # synchronization of the start time from Bernhard
         self.customEventTime = datetime.datetime.now
         while len(self.connectedusers) < self.game.n_agents:
@@ -557,12 +564,6 @@ class Game:
     def instructions(self):
         """Play the initial instructions."""
 
-        ## Change the string on the players display.
-        for i in range(1, 6):
-            self.client.PushCommand(
-                "show_text",
-                f"participant{i}_score_text {self._instruction_msg} 1.0",
-            )
         ## Instruction 1
         self.client.PushCommand("play_take", f"{self._takes['take_1']['name']}")
         print("Take 01 ......")

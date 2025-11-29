@@ -47,7 +47,7 @@ def main() -> None:
         h_rate=H_Rate_One_Shot,
         wealth_objects=wealth_objects,
         cubes_color=cubes_colors,
-        lang="en",
+        lang="pl",
     )
     game.set_number_rounds(number_rounds=nr_rounds)
     game.set_sex(dct=sex_users)
