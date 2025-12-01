@@ -133,7 +133,7 @@ class Game:
         self._score_msg = ""
         self._pause_msg = ""
         self._welcome_msg = ""
-        self._instruction_msg = "Proszę skup się teraz na instrukcji"
+        self._instruction_msg = ""
         self._strings = {
             "pl": {
                 "score_msg": "Posiadane zasoby:",
@@ -225,6 +225,25 @@ class Game:
             },
         }
         self._takes = {}
+
+    def _instruction_off(self, instruction_off: bool = False):
+        """Switches of the instruction.
+
+        Parameters:
+        -----------
+        instruction_off : bool
+            whether to switch off the instructions, by default False
+        """
+        if instruction_off:
+            self._takes = {
+                key: (
+                    {"name": "", "duration": 0}
+                    if key not in ["take_7", "take_8"]
+                    else value
+                )
+                for key, value in self._takes.items()
+            }
+            self.isSyncPhase = False
 
     def _set_language(self):
         """Sets the language of the game."""
@@ -675,7 +694,7 @@ class Game:
                     "rQ": len(self.cube_manager.removed_cubes),
                     "aQ": len(self.cube_manager.avaliable_cubes),
                     "Enviornment Condition": envE / envK,
-                    "Harvesting": self.H,
+                    "Harvesting": list(self.H),
                     **{
                         self.lookup_place_nick(key): value
                         for key, value in self._wealth_dct.items()
@@ -822,17 +841,30 @@ class Game:
                 color = key
         self.cube_manager.set_color_all_objects(color)
 
-    def play(self, file_name: str, interventions_active: bool = True):
+    def play(
+        self,
+        file_name: str,
+        interventions_active: bool = True,
+        instruction_off: bool = False,
+    ):
         """Play the whole game.
 
         Parameters
         ----------
         file_name : str
             the name of the file to which the results will be stored.
+
+        interventions_active : bool
+            whether the game should be played with interventions, by default True
+
+        instruction_off : bool
+            whether to switch off the instructions, by default False
         """
         ## Set the language of the takes
         print("Setting language of the takes...")
         self._set_takes_language(interventions_active=interventions_active)
+
+        self._instruction_off(instruction_off=instruction_off)
         ## Play Instructions
         self.instructions()
 
